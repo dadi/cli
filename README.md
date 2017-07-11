@@ -28,4 +28,24 @@ This tool is still under development and therefore is not yet available on NPM. 
 
 ## Usage
 
-Commands always start with `dadi <product> <command>`, taking different parameters and flags depending on the operation. The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help <product>` and `dadi help <product> <command>` provides detailed information about a product and a command, respectively.
+Commands always start with `dadi <product> <command>`, taking different parameters and flags depending on the operation.
+
+The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help <product>` and `dadi help <product> <command>` provides detailed information about a product and a command, respectively.
+
+```shell
+$ dadi help
+╔══════════════╗
+║              ║
+║   DADI CLI   ║
+║              ║
+╚══════════════╝
+
+> Web
+dadi web new      Creates a new instance of DADI Web
+
+---
+
+Type dadi help <command> to learn more about a specific command.
+
+$
+```
