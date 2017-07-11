@@ -1,0 +1,32 @@
+{
+  "name": "@dadi/cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "dadi": "bin/dadi.js"
+  },
+  "preferGlobal": "true",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@dadi/web-dustjs": "^1.1.0",
+    "@dadi/web-pugjs": "^1.0.0",
+    "boxen": "^1.1.0",
+    "cli-format": "^3.0.9",
+    "colors": "^1.1.2",
+    "inquirer": "^3.2.0",
+    "minimist": "^1.2.0",
+    "ora": "^1.3.0",
+    "registry-url": "^3.1.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4"
+  },
+  "devDependencies": {
+    "standard": "^10.0.2"
+  },
+  "scripts": {
+    "test": "standard"
+  }
+}

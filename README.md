@@ -1,1 +1,31 @@
-# cli
+[![npm (scoped)](https://img.shields.io/npm/v/@dadi/cli.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cli)
+[![coverage](https://img.shields.io/badge/coverage-76%25-yellow.svg?style=flat?style=flat-square)](https://github.com/dadi/cli)
+[![Build Status](https://travis-ci.org/dadi/cli.svg?branch=master)](https://travis-ci.org/dadi/cli)
+[![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](http://standardjs.com/)
+
+# DADI CLI
+
+## Overview
+
+DADI CLI is a command-line tool to help with the installation and customisation of the various products of the DADI platform.
+
+## Installation
+
+This tool is still under development and therefore is not yet available on NPM. In the meantime, follow these steps to install it:
+
+- Clone the repository
+
+   ```
+   git clone git@github.com:dadi/cli.git
+   ```
+
+- Install it as a global module
+   
+   ```
+   cd cli
+   npm install . -g
+   ```
+
+## Usage
+
+Commands always start with `dadi &lt;product&gt; &lt;command&gt;`, taking different parameters and flags depending on the operation. The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help &lt;product&gt;` and `dadi help &lt;product&gt; &lt;command&gt;` provides detailed information about a product and a command, respectively.
