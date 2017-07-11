@@ -1,6 +1,7 @@
 'use strict'
 
 const colors = require('colors')
+const git = require('./../../../lib/git')
 const inquirer = require('inquirer')
 const npm = require('./../../../lib/npm')
 const shell = require('./../../../lib/shell')
@@ -13,7 +14,10 @@ function installWeb ({
 
   command.push(
     shell.command(
-      `git clone git@github.com:dadi/web-boilerplate.git ${directory}`,
+      git.clonePath({
+        remotePath: 'web/boilerplate/latest',
+        targetDirectory: directory
+      }),
       `Cloning boilerplate repository`
     )
   )
