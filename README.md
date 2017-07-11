@@ -28,4 +28,4 @@ This tool is still under development and therefore is not yet available on NPM. 
 
 ## Usage
 
-Commands always start with `dadi &lt;product&gt; &lt;command&gt;`, taking different parameters and flags depending on the operation. The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help &lt;product&gt;` and `dadi help &lt;product&gt; &lt;command&gt;` provides detailed information about a product and a command, respectively.
+Commands always start with `dadi <product> <command>`, taking different parameters and flags depending on the operation. The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help <product>` and `dadi help <product> <command>` provides detailed information about a product and a command, respectively.
