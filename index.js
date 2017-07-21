@@ -4,6 +4,7 @@ const args = require('minimist')(process.argv.slice(2))
 const format = require('./lib/format')
 const entryPoints = {
   api: require('./entryPoints/api'),
+  cdn: require('./entryPoints/cdn'),
   web: require('./entryPoints/web')
 }
 
