@@ -4,9 +4,10 @@ const colors = require('colors')
 const mockRequire = require('mock-require')
 const path = require('path')
 const shell = require('./../../../lib/shell')
+const Table = require('cli-table')
 const validate = require('./../../../lib/validate')
 
-const listRoutes = ({message}) => {
+const listRoutes = ({page, filter, message}) => {
   let webConfig
   let webInstance
 
@@ -34,7 +35,7 @@ const listRoutes = ({message}) => {
   const payload = {
   }
 
-  var getComponent = function (components, key) {
+  const getComponent = function (components, key) {
     return webInstance.App.components[key] || {}
   }
 
@@ -42,9 +43,9 @@ const listRoutes = ({message}) => {
     const components = webInstance.App.components
     const paths = webInstance.App.app.paths
 
-    var Table = require('cli-table')
+    let routes = []
 
-    var table = new Table({
+    let table = new Table({
       chars: {'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': ''},
       head: ['route', 'page', 'datasources'],
       colWidths: [50, 20, 50]
@@ -53,24 +54,46 @@ const listRoutes = ({message}) => {
     paths.forEach(p => {
       let output = {
         path: p.path,
-        page: '',
-        datasources: []
+        page: ''
       }
 
       let component = getComponent(components, p.path)
 
       if (component.page) {
         output.page = component.page.name
-        output.datasources = component.page.datasources
+        output.component = component
+      }
+
+      routes.push(output)
+    })
+
+    if (page) {
+      routes = routes.filter(route => {
+        return route.page === page
+      })
+    }
+
+    if (filter) {
+      routes = routes.filter(route => {
+        return route.path.indexOf(filter) > -1
+      })
+    }
+
+    routes.forEach(route => {
+      let datasources = []
+
+      if (route.component &&
+        route.component.page) {
+          datasources = route.component.page.datasources
       }
 
       table.push(
-        [p.path, output.page, output.datasources.join(', ')]
+        [route.path, route.page, datasources.join(', ')]
       )
     })
 
     if (message) {
-      message.succeed(`Routes initialised, in priority order:\n${table.toString()}`)
+      message.info(`Routes initialised, in priority order:\n${table.toString()}`)
     }
 
     return resolve()
@@ -80,21 +103,23 @@ const listRoutes = ({message}) => {
 module.exports = args => {
   const message = shell.showSpinner('Listing routes')
 
-  return listRoutes({message})
+  return listRoutes({
+    page: args.page,
+    filter: args.filter || '',
+    message
+  })
 }
 
 module.exports.description = 'Lists initialised routes'
 module.exports.parameters = {
-  inline: [
-    {
-      key: 'id',
-      description: 'the client ID'
-    }
-  ],
   flags: [
     {
-      key: 'secret',
-      description: 'the client secret'
+      key: 'page',
+      description: 'see all routes for a particular page'
+    },
+    {
+      key: 'filter',
+      description: 'see all routes that start with a string'
     }
   ]
 }
