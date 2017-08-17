@@ -24,11 +24,13 @@
     "semver-compare-range": "0.0.3"
   },
   "devDependencies": {
+    "istanbul-cobertura-badger": "^1.3.0",
     "jest": "^20.0.4",
     "standard": "^10.0.2"
   },
   "scripts": {
-    "test": "standard && jest"
+    "test": "standard && jest && node test/utils/coverage.js",
+    "test-dev": "jest --watch"
   },
   "jest": {
     "collectCoverage": true,
@@ -48,5 +50,5 @@
     "ignore": [
       "test/**/*"
     ]
-  }  
+  }
 }
