@@ -11,7 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "boxen": "^1.1.0",
     "cli-format": "^3.0.9",
     "cli-table": "^0.3.1",
     "colors": "^1.1.2",
@@ -25,9 +24,29 @@
     "semver-compare-range": "0.0.3"
   },
   "devDependencies": {
+    "jest": "^20.0.4",
     "standard": "^10.0.2"
   },
   "scripts": {
-    "test": "standard"
-  }
+    "test": "standard && jest"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "bin/**/*.js",
+      "entryPoints/**/*.js",
+      "lib/**/*.js"
+    ],
+    "coverageReporters": [
+      "cobertura"
+    ],
+    "testMatch": [
+      "*/**/test/**/*.test.js"
+    ]
+  },
+  "standard": {
+    "ignore": [
+      "test/**/*"
+    ]
+  }  
 }

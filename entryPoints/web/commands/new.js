@@ -78,7 +78,7 @@ module.exports = args => {
     if (!versions.includes(version)) {
       versionMessage.fail(`${colors.bold(version)} is not a valid version. Available versions: ${versions.join(', ')}`)
 
-      return Promise.reject()
+      return Promise.reject(new Error('INVALID_VERSION'))
     }
 
     versionMessage.succeed()

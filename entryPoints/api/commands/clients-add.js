@@ -67,17 +67,10 @@ const createClient = ({clientId, message, secret, type}) => {
       message.succeed(`Created client with ID ${colors.bold(clientId)} and type ${colors.bold(type)}`)
     }
   }).catch(err => {
-    switch (err) {
+    switch (err && err.message) {
       case 'ID_EXISTS':
         if (message) {
           message.fail(`The ID ${colors.bold(clientId)} already exists`)
-        }
-
-        break
-
-      case 'CONNECT_ERROR':
-        if (message) {
-          message.fail('The current directory does not seem to contain a working DADI API installation')
         }
 
         break
@@ -127,7 +120,7 @@ const createRecords = ({
         if (existingClients.results.length > 0) {
           killProcess()
 
-          return reject('ID_EXISTS')
+          return reject(new Error('ID_EXISTS'))
         }
 
         db.insert(payload, clientCollectionName, getClientStoreSchema()).then(result => {
@@ -156,24 +149,6 @@ const createRecordsLegacy = ({
   secret,
   type
 }) => {
-  try {
-    apiConfig = require(path.resolve(
-      process.cwd(),
-      'node_modules',
-      '@dadi',
-      'api'
-    )).Config
-
-    apiConnection = require(path.resolve(
-      process.cwd(),
-      'node_modules',
-      '@dadi',
-      'api'
-    )).Connection
-  } catch (err) {
-    return Promise.reject('CONNECT_ERROR')
-  }
-
   const options = apiConfig.get('auth.database')
   options.auth = true
 
@@ -198,10 +173,14 @@ const createRecordsLegacy = ({
       })
 
       existingClients.toArray((err, documents) => {
+        if (err) {
+          return reject(err)
+        }
+
         if (documents.length > 0) {
           db.close()
 
-          return reject('ID_EXISTS')
+          return reject(new Error('ID_EXISTS'))
         }
 
         db.collection(clientCollectionName).insert(payload, (err, docs) => {
@@ -214,7 +193,7 @@ const createRecordsLegacy = ({
           return resolve(docs)
         })
       })
-    })   
+    })
   })
 }
 

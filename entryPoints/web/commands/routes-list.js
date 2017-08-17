@@ -1,14 +1,11 @@
 'use strict'
 
-const colors = require('colors')
 const mockRequire = require('mock-require')
 const path = require('path')
 const shell = require('./../../../lib/shell')
 const Table = require('cli-table')
-const validate = require('./../../../lib/validate')
 
 const listRoutes = ({page, filter, message}) => {
-  let webConfig
   let webInstance
 
   mockRequire('console-stamp', () => {})
@@ -21,8 +18,6 @@ const listRoutes = ({page, filter, message}) => {
       '@dadi',
       'web'
     ))
-
-    webConfig = webInstance.Config
   } catch (err) {
     console.log(err)
     if (message) {
@@ -30,9 +25,6 @@ const listRoutes = ({page, filter, message}) => {
     }
 
     return
-  }
-
-  const payload = {
   }
 
   const getComponent = function (components, key) {
@@ -82,9 +74,8 @@ const listRoutes = ({page, filter, message}) => {
     routes.forEach(route => {
       let datasources = []
 
-      if (route.component &&
-        route.component.page) {
-          datasources = route.component.page.datasources
+      if (route.component && route.component.page) {
+        datasources = route.component.page.datasources
       }
 
       table.push(

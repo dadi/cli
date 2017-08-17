@@ -2,7 +2,6 @@
 
 const colors = require('colors')
 const git = require('./../../../lib/git')
-const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../lib/shell')
 
 function install ({
@@ -54,7 +53,7 @@ module.exports = args => {
     if (!versions.includes(version)) {
       versionMessage.fail(`${colors.bold(version)} is not a valid version. Available versions: ${versions.join(', ')}`)
 
-      return Promise.reject()
+      return Promise.reject(new Error('INVALID_VERSION'))
     }
 
     versionMessage.succeed()
