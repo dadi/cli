@@ -1,8 +1,8 @@
 const nock = require('nock')
-const registry = require('./../../lib/registry')
+const registry = require('./../../../lib/registry')
 
-describe('Registry utility', () => {
-  test('Makes a request to the correct API endpoint', () => {
+describe('registry utility', () => {
+  test('makes a request to the correct API endpoint', () => {
     const request = nock(registry.apiUrl)
       .get('/versions.json')
       .reply(200, {})
@@ -12,7 +12,7 @@ describe('Registry utility', () => {
     })
   })
 
-  test('Returns the versions for the given product sorted by semver version/range', () => {
+  test('returns the versions for the given product sorted by semver version/range', () => {
     const request = nock(registry.apiUrl)
       .get('/versions.json')
       .reply(200, {
@@ -27,7 +27,7 @@ describe('Registry utility', () => {
     })
   })
 
-  test('Returns an empty array when supplied with an invalid product', () => {
+  test('returns an empty array when supplied with an invalid product', () => {
     const request = nock(registry.apiUrl)
       .get('/versions.json')
       .reply(200, {
@@ -42,7 +42,7 @@ describe('Registry utility', () => {
     })
   })
 
-  test('Returns a rejected Promise if the request fails', () => {
+  test('returns a rejected Promise if the request fails', () => {
     const request = nock(registry.apiUrl)
       .get('/versions.json')
       .reply(500)

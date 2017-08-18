@@ -3,20 +3,20 @@ const mockSpinnerFactory = function (message, callback) {
   this.callback = callback
 }
 
-mockSpinnerFactory.prototype.fail = function () {
-  this.callback(this.message, 'fail')
+mockSpinnerFactory.prototype.fail = function (newMessage) {
+  this.callback(newMessage || this.message, 'fail')
 
   return this
 }
 
-mockSpinnerFactory.prototype.start = function () {
-  this.callback(this.message, 'start')
+mockSpinnerFactory.prototype.start = function (newMessage) {
+  this.callback(newMessage || this.message, 'start')
 
   return this
 }
 
-mockSpinnerFactory.prototype.succeed = function () {
-  this.callback(this.message, 'succeed')
+mockSpinnerFactory.prototype.succeed = function (newMessage) {
+  this.callback(newMessage || this.message, 'succeed')
 
   return this
 }

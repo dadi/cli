@@ -1,9 +1,9 @@
 const nock = require('nock')
-const npm = require('./../../lib/npm')
+const npm = require('./../../../lib/npm')
 const registryUrl = require('registry-url')()
 
 describe('npm utility', () => {
-  test('Makes a request to the correct npm registry endpoint and returns the results', () => {
+  test('makes a request to the correct npm registry endpoint and returns the results', () => {
     const text = 'Some text'
     const resultObjects = [
       {
@@ -26,7 +26,7 @@ describe('npm utility', () => {
     })
   })
 
-  test('Filters the results returned with a callback function provided', () => {
+  test('filters the results returned with a callback function provided', () => {
     const text = 'Some text'
     const resultObjects = [
       {

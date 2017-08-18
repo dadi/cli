@@ -1,7 +1,7 @@
-const mockExec = require('./../helpers/MockExec')
-const mockSpinner = require('./../helpers/MockSpinner')
-const mockCommandOutput = require('./../helpers/MockExec').map
-const shell = require('./../../lib/shell')
+const mockExec = require('./../../helpers/mockExec')
+const mockSpinner = require('./../../helpers/MockSpinner')
+const mockCommandOutput = require('./../../helpers/mockExec').map
+const shell = require('./../../../lib/shell')
 
 describe('Shell utility', () => {
   describe('`run()`', () => {

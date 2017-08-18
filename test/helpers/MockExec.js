@@ -6,7 +6,7 @@ const mockCommandOutput = {
 
 const mockExec = jest.fn((command, callback) => {
   setTimeout(() => {
-    const result = mockCommandOutput[command]
+    const result = mockCommandOutput[command] || ''
 
     if (result instanceof Error) {
       callback(result, null, result.message)
