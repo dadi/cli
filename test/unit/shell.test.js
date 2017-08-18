@@ -1,37 +1,7 @@
+const mockExec = require('./../helpers/MockExec')
 const mockSpinner = require('./../helpers/MockSpinner')
-const MOCK_COMMAND_OUTPUT = {
-  'ls': 'dir1\ndir2\ndir3',
-  'pwd': '/data/dadi/products/cli',
-  'rm .': new Error('"." and ".." may not be removed')
-}
-
-let mockSpinnerOutput = jest.fn()
-let mockExec = jest.fn((command, callback) => {
-  setTimeout(() => {
-    const result = MOCK_COMMAND_OUTPUT[command]
-
-    if (result instanceof Error) {
-      callback(result, null, result.message)
-    } else {
-      callback(null, result, null)
-    }
-  }, 500)
-})
-
-jest.mock('child_process', () => ({
-  exec: mockExec
-}))
-
-jest.mock('ora', () => {
-  return message => new mockSpinner(message, mockSpinnerOutput)
-})
-
+const mockCommandOutput = require('./../helpers/MockExec').map
 const shell = require('./../../lib/shell')
-
-beforeEach(() => {
-  mockExec.mockClear()
-  mockSpinnerOutput.mockClear()
-})
 
 describe('Shell utility', () => {
   describe('`run()`', () => {
@@ -42,7 +12,7 @@ describe('Shell utility', () => {
       return shell.run(command).then(stdout => {
         expect(mockExec).toHaveBeenCalledTimes(1)
         expect(mockExec.mock.calls[0][0]).toEqual(command)
-        expect(stdout).toEqual(MOCK_COMMAND_OUTPUT[command])
+        expect(stdout).toEqual(mockCommandOutput[command])
       })
     })
 
@@ -53,7 +23,7 @@ describe('Shell utility', () => {
       return shell.run(command).then(stdout => {
         expect(mockExec).toHaveBeenCalledTimes(1)
         expect(mockExec.mock.calls[0][0]).toEqual(command.command)
-        expect(stdout).toEqual(MOCK_COMMAND_OUTPUT[command.command])        
+        expect(stdout).toEqual(mockCommandOutput[command.command])        
       })
     })
 
@@ -64,41 +34,41 @@ describe('Shell utility', () => {
 
       const execution = shell.run(command)
 
-      expect(mockSpinnerOutput).toHaveBeenCalledTimes(1)
-      expect(mockSpinnerOutput.mock.calls[0][0]).toEqual(message)
-      expect(mockSpinnerOutput.mock.calls[0][1]).toEqual('start')
+      expect(mockSpinner).toHaveBeenCalledTimes(1)
+      expect(mockSpinner.mock.calls[0][0]).toEqual(message)
+      expect(mockSpinner.mock.calls[0][1]).toEqual('start')
 
       return execution.then(stdout => {
         expect(mockExec).toHaveBeenCalledTimes(1)
         expect(mockExec.mock.calls[0][0]).toEqual(command.command)
-        expect(stdout).toEqual(MOCK_COMMAND_OUTPUT[command.command])
+        expect(stdout).toEqual(mockCommandOutput[command.command])
 
-        expect(mockSpinnerOutput).toHaveBeenCalledTimes(2)
-        expect(mockSpinnerOutput.mock.calls[1][0]).toEqual(message)
-        expect(mockSpinnerOutput.mock.calls[1][1]).toEqual('succeed')
+        expect(mockSpinner).toHaveBeenCalledTimes(2)
+        expect(mockSpinner.mock.calls[1][0]).toEqual(message)
+        expect(mockSpinner.mock.calls[1][1]).toEqual('succeed')
       })
     })
 
     test('runs a shell command and outputs a progress message that transforms into a check mark if the command fails', () => {
       const message = 'Removing current directory'
       const command = shell.command('rm .', message)
-      const mockOutput = MOCK_COMMAND_OUTPUT[command.command]
+      const mockOutput = mockCommandOutput[command.command]
       const lsMock = jest.fn()
 
       const execution = shell.run(command)
 
-      expect(mockSpinnerOutput).toHaveBeenCalledTimes(1)
-      expect(mockSpinnerOutput.mock.calls[0][0]).toEqual(message)
-      expect(mockSpinnerOutput.mock.calls[0][1]).toEqual('start')
+      expect(mockSpinner).toHaveBeenCalledTimes(1)
+      expect(mockSpinner.mock.calls[0][0]).toEqual(message)
+      expect(mockSpinner.mock.calls[0][1]).toEqual('start')
 
       return execution.catch(error => {
         expect(mockExec).toHaveBeenCalledTimes(1)
         expect(mockExec.mock.calls[0][0]).toEqual(command.command)
         expect(error).toBe(mockOutput)
 
-        expect(mockSpinnerOutput).toHaveBeenCalledTimes(2)
-        expect(mockSpinnerOutput.mock.calls[1][0]).toEqual(message)
-        expect(mockSpinnerOutput.mock.calls[1][1]).toEqual('fail')
+        expect(mockSpinner).toHaveBeenCalledTimes(2)
+        expect(mockSpinner.mock.calls[1][0]).toEqual(message)
+        expect(mockSpinner.mock.calls[1][1]).toEqual('fail')
       })
     })
   })
@@ -120,16 +90,16 @@ describe('Shell utility', () => {
         expect(mockExec).toHaveBeenCalledTimes(2)
 
         expect(mockExec.mock.calls[0][0]).toEqual(commands[0].command)
-        expect(mockSpinnerOutput.mock.calls[0][0]).toEqual(commands[0].message)
-        expect(mockSpinnerOutput.mock.calls[0][1]).toEqual('start')
-        expect(mockSpinnerOutput.mock.calls[1][0]).toEqual(commands[0].message)
-        expect(mockSpinnerOutput.mock.calls[1][1]).toEqual('succeed')
+        expect(mockSpinner.mock.calls[0][0]).toEqual(commands[0].message)
+        expect(mockSpinner.mock.calls[0][1]).toEqual('start')
+        expect(mockSpinner.mock.calls[1][0]).toEqual(commands[0].message)
+        expect(mockSpinner.mock.calls[1][1]).toEqual('succeed')
 
         expect(mockExec.mock.calls[1][0]).toEqual(commands[1].command)
-        expect(mockSpinnerOutput.mock.calls[2][0]).toEqual(commands[1].message)
-        expect(mockSpinnerOutput.mock.calls[2][1]).toEqual('start')
-        expect(mockSpinnerOutput.mock.calls[3][0]).toEqual(commands[1].message)
-        expect(mockSpinnerOutput.mock.calls[3][1]).toEqual('succeed')
+        expect(mockSpinner.mock.calls[2][0]).toEqual(commands[1].message)
+        expect(mockSpinner.mock.calls[2][1]).toEqual('start')
+        expect(mockSpinner.mock.calls[3][0]).toEqual(commands[1].message)
+        expect(mockSpinner.mock.calls[3][1]).toEqual('succeed')
       })
     })
 
@@ -162,10 +132,10 @@ describe('Shell utility', () => {
       const message = 'Who\'s your DADI?'
       const spinner = shell.showSpinner(message)
 
-      expect(mockSpinnerOutput).toHaveBeenCalledTimes(1)
-      expect(mockSpinnerOutput.mock.calls[0][0]).toEqual(message)
-      expect(mockSpinnerOutput.mock.calls[0][1]).toEqual('start')
-      expect(spinner.constructor).toBe(mockSpinner)
+      expect(mockSpinner).toHaveBeenCalledTimes(1)
+      expect(mockSpinner.mock.calls[0][0]).toEqual(message)
+      expect(mockSpinner.mock.calls[0][1]).toEqual('start')
+      expect(spinner.constructor).toBe(mockSpinner.factory)
     })
   })
 })
