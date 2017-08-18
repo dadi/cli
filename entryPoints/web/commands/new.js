@@ -1,9 +1,9 @@
 'use strict'
 
 const colors = require('colors')
-const git = require('./../../../lib/git')
 const inquirer = require('inquirer')
 const npm = require('./../../../lib/npm')
+const registry = require('./../../../lib/registry')
 const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../lib/shell')
 
@@ -16,7 +16,7 @@ function installWeb ({
 
   command.push(
     shell.command(
-      git.clonePath({
+      registry.clonePath({
         remotePath: `web/boilerplate/${version}`,
         targetDirectory: directory
       }),
@@ -72,7 +72,7 @@ module.exports = args => {
   const directory = args._[2] || '.'
   const versionMessage = shell.showSpinner('Checking the available versions of DADI Web')
 
-  return git.getBoilerplateVersions('web').then(versions => {
+  return registry.getBoilerplateVersions('web').then(versions => {
     const version = args.version || versions[versions.length - 1]
 
     if (!versions.includes(version)) {

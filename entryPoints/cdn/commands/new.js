@@ -1,7 +1,7 @@
 'use strict'
 
 const colors = require('colors')
-const git = require('./../../../lib/git')
+const registry = require('./../../../lib/registry')
 const shell = require('./../../../lib/shell')
 
 function install ({
@@ -12,7 +12,7 @@ function install ({
 
   command.push(
     shell.command(
-      git.clonePath({
+      registry.clonePath({
         remotePath: `cdn/boilerplate/${version}`,
         targetDirectory: directory
       }),
@@ -47,7 +47,7 @@ module.exports = args => {
   const directory = args._[2] || '.'
   const versionMessage = shell.showSpinner('Checking the available versions of DADI CDN')
 
-  return git.getBoilerplateVersions('cdn').then(versions => {
+  return registry.getBoilerplateVersions('cdn').then(versions => {
     const version = args.version || versions[versions.length - 1]
 
     if (!versions.includes(version)) {
