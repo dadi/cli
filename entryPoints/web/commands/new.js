@@ -85,7 +85,7 @@ module.exports = args => {
 
     return version
   }).then(version => {
-    let engines = Promise.resolve(null)
+    let engines = null
     let questions = []
 
     // We only ask about template engines for versions >= 3.x
@@ -128,7 +128,7 @@ module.exports = args => {
             .prompt(questions)
             .then(answers => answers.engines)
         }).catch(err => { // eslint-disable-line handle-callback-err
-          npmMessage.fail('Could not connect to NPM registry. Are you connected to the internet?')
+          npmMessage.fail('Could not connect to NPM registry. Are you connected to the Internet?')
         })
       }
     }
