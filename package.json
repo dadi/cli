@@ -1,14 +1,14 @@
 {
   "name": "@dadi/cli",
   "version": "1.0.0",
-  "description": "",
+  "description": "A command-line tool for installation and customisation of the DADI platform",
   "main": "index.js",
   "bin": {
     "dadi": "bin/dadi.js"
   },
   "preferGlobal": "true",
   "keywords": [],
-  "author": "",
+  "author": "eb@dadi.co",
   "license": "ISC",
   "dependencies": {
     "cli-format": "^3.0.9",
@@ -30,6 +30,14 @@
     "pmock": "^0.2.3",
     "standard": "^10.0.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dadi/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dadi/cli/issues"
+  },
+  "homepage": "https://github.com/dadi/cli",
   "scripts": {
     "test": "standard && jest && node test/utils/coverage.js",
     "test-dev": "jest --watch"
@@ -49,7 +57,7 @@
     ],
     "moduleNameMapper": {
       "/Users/fakeuser/fakedir/node_modules/@dadi/api": "<rootDir>/test/helpers/MockDadiApi.js"
-    }   
+    }
   },
   "standard": {
     "ignore": [
