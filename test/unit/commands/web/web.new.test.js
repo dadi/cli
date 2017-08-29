@@ -94,7 +94,7 @@ describe('Web `new` command', () => {
         })
 
         const enginesCall = mockExec.mock.calls.find(command => {
-          return command[0].includes('{"engines":["@dadi\\/web-dustjs","@dadi\\/web-pugjs"]}')
+          return command[0].includes('{"engines":[require(\\"@dadi\\/web-dustjs\\"),require(\\"@dadi\\/web-pugjs\\")]}')
         })
 
         expect(Array.isArray(dustInstall)).toBe(true)
@@ -213,7 +213,7 @@ describe('Web `new` command', () => {
         })
 
         const enginesCall = mockExec.mock.calls.find(command => {
-          return command[0].includes('{"engines":["@dadi\\/web-pugjs"]}')
+          return command[0].includes('{"engines":[require(\\"@dadi\\/web-pugjs\\")]}')
         })        
 
         expect(Array.isArray(pugInstall)).toBe(true)

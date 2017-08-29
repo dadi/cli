@@ -41,8 +41,11 @@ function installWeb ({
       )
     })
 
-    const enginesBlock = JSON.stringify({engines})
+    const enginesBlock = JSON.stringify({
+      engines: engines.map(engine => `require("${engine}")`)
+    })
       .replace(new RegExp('/', 'g'), '\\/')
+      .replace(/"require\(([^)]*)\)"/g, 'require($1)')
 
     command.push(
       shell.command(
