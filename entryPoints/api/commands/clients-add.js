@@ -6,7 +6,6 @@ const mockRequire = require('mock-require')
 const path = require('path')
 const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../lib/shell')
-const validate = require('./../../../lib/validate')
 
 const createClient = ({clientId, message, secret, type}) => {
   // Mocking these modules so that API doesn't polute stdout.
@@ -268,12 +267,13 @@ const renderQuestions = () => {
 }
 
 module.exports = args => {
-  getApiVersion()
-
   if (args.id || args.secret) {
     const message = shell.showSpinner('Creating a new client')
     const invalidArgs = ['id', 'secret'].filter(arg => {
-      return !validate.isStringLongerThan(args[arg], 0)
+      return (
+        typeof args[arg] !== 'string' ||
+        args[arg].length === 0
+      )
     }).map(arg => colors.bold(arg))
 
     if (invalidArgs.length > 0) {
@@ -304,13 +304,11 @@ module.exports = args => {
 
 module.exports.description = 'Creates a new client'
 module.exports.parameters = {
-  inline: [
+  flags: [
     {
       key: 'id',
       description: 'the client ID'
-    }
-  ],
-  flags: [
+    },
     {
       key: 'secret',
       description: 'the client secret'
