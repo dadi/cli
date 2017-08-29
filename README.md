@@ -1,4 +1,4 @@
-<img src="https://dadi.tech/assets/products/dadi-cli.png" alt="DADI CLI logo" height="65"/>
+<img src="https://dadi.tech/assets/products/dadi-cli.png?v=1" alt="DADI CLI logo" height="65"/>
 
 [![npm (scoped)](https://img.shields.io/npm/v/@dadi/cli.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cli)
 [![coverage](https://img.shields.io/badge/coverage-55%25-red.svg?style=flat?style=flat-square)](https://github.com/dadi/cli)
