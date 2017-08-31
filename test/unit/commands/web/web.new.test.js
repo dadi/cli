@@ -1,15 +1,22 @@
 require('./../../../helpers/disable-colours')
 
 const argsHelper = require('./../../../helpers/args')
+const fs = require('fs')
 const mockExec = require('./../../../helpers/mockExec')
 const mockInquirer = require('./../../../helpers/mockInquirer')
 const mockSpinner = require('./../../../helpers/MockSpinner')
 const nock = require('nock')
+const path = require('path')
 const registry = require('./../../../../lib/registry')
 const registryUrl = require('registry-url')()
-const setMockInquirerAnswer = require('./../../../helpers/mockInquirer').setAnswer
 
 const webNew = require('./../../../../entryPoints/web/commands/new')
+
+beforeEach(() => {
+  fs.readdir = jest.fn((path, callback) => {
+    callback(null, [])
+  })
+})
 
 describe('Web `new` command', () => {
   test('exports a description string', () => {
@@ -43,6 +50,62 @@ describe('Web `new` command', () => {
       expect(mockSpinner.mock.calls[1][0]).toContain('Available versions: 1.3, 1.5')
     })
   })
+
+  describe('alerts the user when the target directory exists and is not empty', () => {
+    test('when specifying a directory', () => {
+      const args = argsHelper.getArgsForCommand('dadi web new my-existing-dir')
+      const fsReadDir = fs.readdir
+
+      fs.readdir = jest.fn((path, callback) => {
+        callback(null, [
+          'dir1',
+          'dir2'
+        ])
+      })
+
+      mockInquirer.setAnswer({
+        confirm: false
+      })    
+      
+      registry.getBoilerplateVersions = jest.fn(product => {
+        return Promise.resolve(['1.3', '1.5'])
+      })
+
+      return webNew(args).catch(stdout => {
+        expect(mockInquirer.mock.calls[0][0][0].type)
+          .toBe('confirm')
+        expect(mockInquirer.mock.calls[0][0][0].message)
+          .toBe(`The target directory (${path.resolve('my-existing-dir')}) is not empty. Would you like to proceed?`)
+      })
+    })
+
+    test('when not specifying a directory', () => {
+      const args = argsHelper.getArgsForCommand('dadi web new')
+      const fsReadDir = fs.readdir
+
+      fs.readdir = jest.fn((path, callback) => {
+        callback(null, [
+          'dir1',
+          'dir2'
+        ])
+      })
+
+      mockInquirer.setAnswer({
+        confirm: false
+      })    
+      
+      registry.getBoilerplateVersions = jest.fn(product => {
+        return Promise.resolve(['1.3', '1.5'])
+      })
+
+      return webNew(args).catch(stdout => {
+        expect(mockInquirer.mock.calls[0][0][0].type)
+          .toBe('confirm')
+        expect(mockInquirer.mock.calls[0][0][0].message)
+          .toBe(`The target directory (${path.resolve('.')}) is not empty. Would you like to proceed?`)
+      })
+    })    
+  })  
 
   test('uses the directory specified in the command if one is specified, constructing the success message accordingly', () => {
     const args = argsHelper.getArgsForCommand('dadi web new my-new-web')
@@ -194,7 +257,7 @@ describe('Web `new` command', () => {
         }
       ]
 
-      setMockInquirerAnswer({
+      mockInquirer.setAnswer({
         engines: ['@dadi/web-pugjs']
       })
 

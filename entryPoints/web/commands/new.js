@@ -1,6 +1,7 @@
 'use strict'
 
 const colors = require('colors')
+const fsHelpers = require('./../../../lib/fs')
 const inquirer = require('inquirer')
 const npm = require('./../../../lib/npm')
 const registry = require('./../../../lib/registry')
@@ -73,74 +74,79 @@ function installWeb ({
 
 module.exports = args => {
   const directory = args._[2] || '.'
-  const versionMessage = shell.showSpinner('Checking the available versions of DADI Web')
 
-  return registry.getBoilerplateVersions('web').then(versions => {
-    const version = args.version || versions[versions.length - 1]
+  return fsHelpers.warnIfDirectoryIsNotEmpty({
+    directory
+  }).then(() => {
+    const versionMessage = shell.showSpinner('Checking the available versions of DADI Web')
 
-    if (!versions.includes(version)) {
-      versionMessage.fail(`${colors.bold(version)} is not a valid version. Available versions: ${versions.join(', ')}`)
+    return registry.getBoilerplateVersions('web').then(versions => {
+      const version = args.version || versions[versions.length - 1]
 
-      return Promise.reject(new Error('INVALID_VERSION'))
-    }
+      if (!versions.includes(version)) {
+        versionMessage.fail(`${colors.bold(version)} is not a valid version. Available versions: ${versions.join(', ')}`)
 
-    versionMessage.succeed()
-
-    return version
-  }).then(version => {
-    let engines = null
-    let questions = []
-
-    // We only ask about template engines for versions >= 3.x
-    if (semverRangeCompare(version, '3.x') >= 0) {
-      if (args.engine) {
-        engines = Array.isArray(args.engine)
-          ? args.engine
-          : [args.engine]
-      } else {
-        const filterFn = result => {
-          return result.package &&
-            result.package.keywords &&
-            result.package.keywords.includes('web')
-        }
-
-        const npmMessage = shell.showSpinner('Pulling the list of available template engines from NPM')
-
-        engines = npm.search({
-          filter: filterFn,
-          text: 'dadi web'
-        }).then(response => {
-          npmMessage.succeed()
-
-          const engineChoices = response.map(item => {
-            return {
-              name: `${item.package.name} — ${item.package.description}`,
-              short: item.package.name,
-              value: item.package.name
-            }
-          })
-
-          questions.push({
-            type: 'checkbox',
-            name: 'engines',
-            message: 'Which template engines would you like to install?',
-            choices: engineChoices
-          })
-
-          return inquirer
-            .prompt(questions)
-            .then(answers => answers.engines)
-        }).catch(err => { // eslint-disable-line handle-callback-err
-          npmMessage.fail('Could not connect to NPM registry. Are you connected to the Internet?')
-        })
+        return Promise.reject(new Error('INVALID_VERSION'))
       }
-    }
 
-    return Promise.resolve(engines).then(engines => {
-      return installWeb({
-        directory,
-        engines,
-        version
+      versionMessage.succeed()
+
+      return version
+    }).then(version => {
+      let engines = null
+      let questions = []
+
+      // We only ask about template engines for versions >= 3.x
+      if (semverRangeCompare(version, '3.x') >= 0) {
+        if (args.engine) {
+          engines = Array.isArray(args.engine)
+            ? args.engine
+            : [args.engine]
+        } else {
+          const filterFn = result => {
+            return result.package &&
+              result.package.keywords &&
+              result.package.keywords.includes('web')
+          }
+
+          const npmMessage = shell.showSpinner('Pulling the list of available template engines from NPM')
+
+          engines = npm.search({
+            filter: filterFn,
+            text: 'dadi web'
+          }).then(response => {
+            npmMessage.succeed()
+
+            const engineChoices = response.map(item => {
+              return {
+                name: `${item.package.name} — ${item.package.description}`,
+                short: item.package.name,
+                value: item.package.name
+              }
+            })
+
+            questions.push({
+              type: 'checkbox',
+              name: 'engines',
+              message: 'Which template engines would you like to install?',
+              choices: engineChoices
+            })
+
+            return inquirer
+              .prompt(questions)
+              .then(answers => answers.engines)
+          }).catch(err => { // eslint-disable-line handle-callback-err
+            npmMessage.fail('Could not connect to NPM registry. Are you connected to the Internet?')
+          })
+        }
+      }
+
+      return Promise.resolve(engines).then(engines => {
+        return installWeb({
+          directory,
+          engines,
+          version
+        })
       })
     })
   })

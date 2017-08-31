@@ -1,6 +1,7 @@
 'use strict'
 
 const colors = require('colors')
+const fsHelpers = require('./../../../lib/fs')
 const registry = require('./../../../lib/registry')
 const shell = require('./../../../lib/shell')
 
@@ -45,24 +46,29 @@ function install ({
 
 module.exports = args => {
   const directory = args._[2] || '.'
-  const versionMessage = shell.showSpinner('Checking the available versions of DADI API')
 
-  return registry.getBoilerplateVersions('api').then(versions => {
-    const version = args.version || versions[versions.length - 1]
+  return fsHelpers.warnIfDirectoryIsNotEmpty({
+    directory
+  }).then(() => {
+    const versionMessage = shell.showSpinner('Checking the available versions of DADI API')
 
-    if (!versions.includes(version)) {
-      versionMessage.fail(`${colors.bold(version)} is not a valid version. Available versions: ${versions.join(', ')}`)
+    return registry.getBoilerplateVersions('api').then(versions => {
+      const version = args.version || versions[versions.length - 1]
 
-      return Promise.reject(new Error('INVALID_VERSION'))
-    }
+      if (!versions.includes(version)) {
+        versionMessage.fail(`${colors.bold(version)} is not a valid version. Available versions: ${versions.join(', ')}`)
 
-    versionMessage.succeed()
+        return Promise.reject(new Error('INVALID_VERSION'))
+      }
 
-    return version
-  }).then(version => {
-    return install({
-      directory,
-      version
+      versionMessage.succeed()
+
+      return version
+    }).then(version => {
+      return install({
+        directory,
+        version
+      })
     })
   })
 }
