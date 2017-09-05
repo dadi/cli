@@ -258,6 +258,57 @@ describe('Web `new` command', () => {
       ]
 
       mockInquirer.setAnswer({
+        engines: ['@dadi/web-dustjs']
+      })
+
+      const request = nock(registryUrl)
+        .get('/-/v1/search')
+        .query({
+          text: 'dadi web'
+        })
+        .reply(200, {objects: availableEngines})
+
+      return webNew(args).then(stdout => {
+        expect(request.isDone()).toBe(true)
+
+        const pugInstall = mockExec.mock.calls.find(command => {
+          return command[0].includes('npm install @dadi/web-dustjs --save')
+        })
+
+        const enginesCall = mockExec.mock.calls.find(command => {
+          return command[0].includes('{"engines":[require(\\"@dadi\\/web-dustjs\\")]}')
+        })
+
+        expect(Array.isArray(pugInstall)).toBe(true)
+        expect(Array.isArray(enginesCall)).toBe(true)
+      })
+    })
+
+    test('installs and initialises Dust.js even if not selected by the user', () => {
+      const args = argsHelper.getArgsForCommand('dadi web new')
+
+      registry.getBoilerplateVersions = jest.fn(product => {
+        return Promise.resolve(['1.x', '2.x', '3.x'])
+      })
+
+      const availableEngines = [
+        {
+          package: {
+            name: '@dadi/web-dustjs',
+            description: 'A Dust.js interface for DADI Web',
+            keywords: ['dadi', 'web']
+          }
+        },
+        {
+          package: {
+            name: '@dadi/web-pugjs',
+            description: 'A Pug.js interface for DADI Web',
+            keywords: ['dadi', 'web']
+          }
+        }
+      ]
+
+      mockInquirer.setAnswer({
         engines: ['@dadi/web-pugjs']
       })
 
@@ -276,7 +327,7 @@ describe('Web `new` command', () => {
         })
 
         const enginesCall = mockExec.mock.calls.find(command => {
-          return command[0].includes('{"engines":[require(\\"@dadi\\/web-pugjs\\")]}')
+          return command[0].includes('{"engines":[require(\\"@dadi\\/web-pugjs\\"),require(\\"@dadi\\/web-dustjs\\")]}')
         })        
 
         expect(Array.isArray(pugInstall)).toBe(true)

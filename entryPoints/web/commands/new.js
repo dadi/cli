@@ -33,6 +33,12 @@ function installWeb ({
   )
 
   if (engines) {
+    // Because boilerplates include Dust pages, we sort of
+    // need to guarantee that Dust is installed.
+    if (!engines.includes('@dadi/web-dustjs')) {
+      engines.push('@dadi/web-dustjs')
+    }
+
     engines.forEach(engine => {
       command.push(
         shell.command(
