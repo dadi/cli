@@ -33,7 +33,6 @@ module.exports = ({
   secret,
   type
 }) => {
-  console.log('!!!! HELLO')
   const clientCollectionName = apiConfig.get('auth.clientCollection')
   const dbOptions = {
     auth: true,

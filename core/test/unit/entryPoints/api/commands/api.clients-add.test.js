@@ -9,6 +9,7 @@ const path = require('path')
 const pmock = require('pmock')
 const registry = require('./../../../../../lib/registry')
 const setMockInquirerAnswer = require('./../../../../helpers/mockInquirer').setAnswer
+const shell = require('./../../../../../lib/shell')
 
 let apiClientsAdd = require('./../../../../../entryPoints/api/commands/clients-add')
 
@@ -30,27 +31,6 @@ describe('API `clients:add` command', () => {
     let mockDatabase
 
     beforeAll(() => {
-      mockDatabase = {
-        close: jest.fn(),
-
-        find: jest.fn(() => {
-          return {
-            toArray: callback => {
-              callback(null, mockClients)
-            }
-          }
-        }),
-
-        insert: jest.fn((payload, callback) => {
-          callback(null, {})
-        })
-      }
-
-      mockDatabase.collection = jest.fn(collection => ({
-        find: mockDatabase.find,
-        insert: mockDatabase.insert
-      }))
-
       mockApi = {
         module: {
           Config: {
@@ -83,6 +63,27 @@ describe('API `clients:add` command', () => {
     })
 
     beforeEach(() => {
+      mockDatabase = {
+        close: jest.fn(),
+
+        find: jest.fn(() => {
+          return {
+            toArray: callback => {
+              callback(null, mockClients)
+            }
+          }
+        }),
+
+        insert: jest.fn((payload, callback) => {
+          callback(null, {})
+        })
+      }
+
+      mockDatabase.collection = jest.fn(collection => ({
+        find: mockDatabase.find,
+        insert: mockDatabase.insert
+      }))
+
       mockClients = []
     })
 
@@ -151,6 +152,65 @@ describe('API `clients:add` command', () => {
           expect(mockDatabase.close).toHaveBeenCalled()
         })
       })
+
+      test('displays an error message if the find operation has failed', () => {
+        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const mockAnswers = {
+          id: 'existingClient',
+          secret: 'superSecret',
+          type: 'admin'
+        }
+
+        setMockInquirerAnswer(mockAnswers)
+
+        mockClients = [
+          {
+            clientId: mockAnswers.id
+          }
+        ]
+
+        mockDatabase.find = jest.fn(() => {
+          return {
+            toArray: callback => {
+              callback(true)
+            }
+          }
+        })
+
+        return apiClientsAdd(args).then(stdout => {
+          expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
+          expect(mockSpinner.mock.calls[0][1]).toBe('start')
+          expect(mockSpinner.mock.calls[1][0]).toBe('Could not create client')
+          expect(mockSpinner.mock.calls[1][1]).toBe('fail')
+          expect(mockDatabase.close).toHaveBeenCalled()
+        })
+      })
+
+      test('displays an error message if the insert operation has failed', () => {
+        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const mockAnswers = {
+          id: 'existingClient',
+          secret: 'superSecret',
+          type: 'admin'
+        }
+
+        setMockInquirerAnswer(mockAnswers)
+
+        mockClients = []
+
+        mockDatabase.insert = jest.fn((payload, callback) => {
+          callback(true)
+        })
+
+        return apiClientsAdd(args).then(stdout => {
+          expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
+          expect(mockSpinner.mock.calls[0][1]).toBe('start')
+          expect(mockSpinner.mock.calls[1][0]).toBe('Could not create client')
+          expect(mockSpinner.mock.calls[1][1]).toBe('fail')
+
+          expect(mockDatabase.close).toHaveBeenCalled()
+        })
+      })
     })
 
     describe('uses data passed as parameters', () => {
@@ -163,7 +223,7 @@ describe('API `clients:add` command', () => {
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
         )
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
@@ -205,7 +265,7 @@ describe('API `clients:add` command', () => {
             clientId: mockArgs.clientId
           }
         ]
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
@@ -229,6 +289,14 @@ describe('API `clients:add` command', () => {
     let mockApi
     let mockClients
     let mockDatabase
+    let mockShellKillProcess = jest.fn()
+
+    const mockShowSpinner = shell.showSpinner
+
+    jest.mock('./../../../../../lib/shell', () => ({
+      killProcess: mockShellKillProcess,
+      showSpinner: mockShowSpinner
+    }))
 
     beforeAll(() => {
       mockDatabase = {
@@ -275,9 +343,10 @@ describe('API `clients:add` command', () => {
     })
 
     afterEach(() => {
+      mockApi.module.Connection.mockClear()
       mockDatabase.find.mockClear()
       mockDatabase.insert.mockClear()
-      mockApi.module.Connection.mockClear()
+      mockShellKillProcess.mockClear()
     })
 
     describe('triggers interactive mode if data isn\'t supplied as parameters', () => {
@@ -294,12 +363,15 @@ describe('API `clients:add` command', () => {
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
+
           expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
           expect(mockDatabase.insert.mock.calls[0][0]).toEqual({
             clientId: mockAnswers.id,
             secret: mockAnswers.secret,
             type: mockAnswers.type
           })
+
+          expect(mockShellKillProcess).toHaveBeenCalled()
         })
       })
 
@@ -327,6 +399,8 @@ describe('API `clients:add` command', () => {
 
           expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
           expect(mockDatabase.insert).not.toHaveBeenCalled()
+
+          expect(mockShellKillProcess).toHaveBeenCalled()
         })
       })
     })
@@ -345,8 +419,11 @@ describe('API `clients:add` command', () => {
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
+
           expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
           expect(mockDatabase.insert.mock.calls[0][0]).toEqual(mockArgs)
+
+          expect(mockShellKillProcess).toHaveBeenCalled()
         })
       })
 
@@ -363,8 +440,11 @@ describe('API `clients:add` command', () => {
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
+
           expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
           expect(mockDatabase.insert.mock.calls[0][0]).toEqual(mockArgs)
+
+          expect(mockShellKillProcess).toHaveBeenCalled()
         })
       })
 
@@ -392,6 +472,8 @@ describe('API `clients:add` command', () => {
 
           expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
           expect(mockDatabase.insert).not.toHaveBeenCalled()
+
+          expect(mockShellKillProcess).toHaveBeenCalled()
         })
       })
     })

@@ -30,6 +30,8 @@ module.exports = ({
 
       existingClients.toArray((err, documents) => {
         if (err) {
+          db.close()
+
           return reject(err)
         }
 
@@ -40,11 +42,11 @@ module.exports = ({
         }
 
         db.collection(clientCollectionName).insert(payload, (err, docs) => {
+          db.close()
+
           if (err) {
             return reject(err)
           }
-
-          db.close()
 
           return resolve(docs)
         })
