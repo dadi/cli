@@ -86,7 +86,7 @@ Setup.prototype.start = function () {
           return
         }
 
-        return inquirer.prompt(question).then(newAnswer => {
+        return inquirer.prompt([question]).then(newAnswer => {
           if (newAnswer.length === 0) return
 
           answers = answers

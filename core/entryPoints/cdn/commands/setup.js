@@ -275,8 +275,10 @@ const steps = [
 ]
 
 const launchSetup = () => {
+  const app = '@dadi/cdn'
+
   return configHelpers.getAppConfig({
-    app: '@dadi/cdn'
+    app
   }).then(config => {
     const setup = new Setup(steps, config.schema)
 
@@ -287,7 +289,7 @@ const launchSetup = () => {
     const configSpinner = shellHelpers.showSpinner('Writing configuration file')
 
     return configHelpers.saveAppConfig({
-      app: '@dadi/cdn',
+      app,
       config: answers,
       environment: answers.env
     }).then(result => {
