@@ -4,6 +4,8 @@ const mockInquirer = require('./../../helpers/mockInquirer')
 const format = require('./../../../lib/format')
 const Setup = require('./../../../lib/setup')
 
+// (!) We're mocking `console.log()` in this test, so if you need
+// to debug something within the test itself, you must use `debug()`
 const debug = console.log
 console.log = jest.fn()
 

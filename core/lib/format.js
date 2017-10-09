@@ -36,9 +36,9 @@ FormatHelpers.prototype.getBanner = function (text) {
     paddingRight: colors.yellow.bold(' *')
   }
 
-  const banner = '\n' + colors.yellow.bold('* ').repeat(Math.ceil(settings.width / 2)) +
+  const banner = '\n' + colors.yellow.bold('* ').repeat(Math.ceil(settings.width / 2)).slice(0, -1) +
     '\n' + cliFormat.wrap(text, settings) +
-    '\n' + colors.yellow.bold('* ').repeat(Math.ceil(settings.width / 2))
+    '\n' + colors.yellow.bold('* ').repeat(Math.ceil(settings.width / 2)).slice(0, -1)
 
   return banner
 }
@@ -46,12 +46,7 @@ FormatHelpers.prototype.getBanner = function (text) {
 FormatHelpers.prototype.getCommandHelp = function (entryPoint, command) {
   const commandObj = entryPoint.commands[command]
 
-  let lines = []
-
-  lines.push(
-    this.getHeader(entryPoint)
-  )
-
+  let lines = [this.getHeader()]
   let parametersCommandStr = ''
   let parametersDescription
 
@@ -168,7 +163,7 @@ FormatHelpers.prototype.getGeneralHelp = function (entryPoints, invalidCommand) 
   return lines.join('\n')
 }
 
-FormatHelpers.prototype.getHeader = function (entryPoint) {
+FormatHelpers.prototype.getHeader = function () {
   const headerStr = colors.red(`
   ▓▓▓▓▓  ▓▓▓▓▓▓▓
               ▓▓▓▓
