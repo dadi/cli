@@ -2,7 +2,7 @@ require('./../../../../helpers/disable-colours')
 
 const argsHelper = require('./../../../../helpers/args')
 const fs = require('fs-extra')
-const mockExec = require('./../../../../helpers/mockExec')
+const mockExec = require('./../../../../helpers/MockExec')
 const mockInquirer = require('./../../../../helpers/mockInquirer')
 const mockSpinner = require('./../../../../helpers/MockSpinner')
 const nock = require('nock')

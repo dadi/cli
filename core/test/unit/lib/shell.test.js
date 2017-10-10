@@ -1,4 +1,4 @@
-const mockExec = require('./../../helpers/mockExec')
+const mockExec = require('./../../helpers/MockExec')
 const mockSpinner = require('./../../helpers/MockSpinner')
 const mockCommandOutput = require('./../../helpers/mockExec').map
 const shell = require('./../../../lib/shell')
