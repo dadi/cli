@@ -4,10 +4,6 @@ const Installer = require(
 )
 
 const install = new Installer({
-  cachePath: path.join(
-    __dirname,
-    'cache.json'
-  ),
   targetDirectory: __dirname
 })
 

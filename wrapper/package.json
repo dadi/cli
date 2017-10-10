@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "colors": "^1.1.2",
-    "latest-version": "^3.1.0",
     "node-fetch": "^1.7.3",
     "progress": "^2.0.0",
     "semver-compare-range": "0.0.3"

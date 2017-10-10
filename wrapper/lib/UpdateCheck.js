@@ -1,7 +1,8 @@
 'use strict'
 
+const constants = require('./constants')
+const fetch = require('node-fetch')
 const fs = require('fs')
-const latestVersion = require('latest-version')
 const path = require('path')
 const semverRangeCompare = require('semver-compare-range')
 
@@ -12,18 +13,34 @@ const UpdateCheck = function (options) {
   this.queue = null
 }
 
-UpdateCheck.prototype.checkForUpdates = function (packageName) {
+UpdateCheck.prototype.checkForUpdates = function () {
   return this.readCache().then(cache => {
     if ((cache.timestamp + MAX_POLL_INTERVAL) <= Date.now()) {
-      return latestVersion(packageName).then(remoteVersion => {
+      return this.getLatestVersion().then(remoteVersion => {
         if (semverRangeCompare(remoteVersion, cache.version) > 0) {
           return remoteVersion
+        } else {
+          this.writeCache(remoteVersion)
         }
       })
     }
 
     return null
+  }).catch(err => {
+    return this.getLatestVersion()
   })
+}
+
+UpdateCheck.prototype.getLatestVersion = function () {
+  return fetch(constants.registryUrl + '/v1/cli.json').then(res => {
+    return res.json()
+  }).then(res => {
+    return res.version
+  })
+}
+
+UpdateCheck.prototype.installationHasFinished = function (version) {
+  return this.writeCache(version)
 }
 
 UpdateCheck.prototype.readCache = function (rejectOnFailure) {
