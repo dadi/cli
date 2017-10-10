@@ -1,7 +1,4 @@
 language: node_js
-cache:
-  directories:
-    - node_modules
 notifications:
   slack: dadi:pnhiL60xOrm7GOglHUmb7xHK
   email: false
@@ -9,8 +6,4 @@ node_js:
   - '8'
   - '7'
   - '6'
-before_install:
-  - if [[ `npm -v` != 3* ]]; then npm i -g npm@latest; fi
-before_script:
-  - npm prune
 script: cd core && npm install && npm test
