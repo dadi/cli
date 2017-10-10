@@ -1,3 +1,4 @@
+const constants = require('./constants')
 const exec = require('child_process').exec
 const fetch = require('node-fetch')
 const fs = require('fs')
@@ -7,8 +8,6 @@ const spawnSync = require('child_process').spawnSync
 const UpdateCheck = require('./UpdateCheck')
 
 const Installer = function (options) {
-  this.baseUrl = 'http://raw.githubusercontent.com/eduardoboucas/cli/master/core/bin/'
-  this.cachePath = options.cachePath
   this.targetDirectory = options.targetDirectory
 
   this.binDirectory = path.join(options.targetDirectory, 'bin')
@@ -54,18 +53,20 @@ Installer.prototype.detectPlatform = function () {
 }
 
 Installer.prototype.getBinaryURLForPlatform = function () {
+  const cliBinariesUrl = constants.registryUrl + '/cli/binaries/'
+
   switch (this.detectPlatform()) {
     case 'alpine':
-      return this.baseUrl + 'dadi-alpine'
+      return cliBinariesUrl + 'dadi-alpine'
 
     case 'darwin':
-      return this.baseUrl + 'dadi-macos'
+      return cliBinariesUrl + 'dadi-macos'
 
     case 'linux':
-      return this.baseUrl + 'dadi-linux'
+      return cliBinariesUrl + 'dadi-linux'
 
     case 'win32':
-      return this.baseUrl + 'dadi-win.exe'
+      return cliBinariesUrl + 'dadi-win.exe'
 
     default:
       throw new Error('PLATFORM_NOT_SUPPORTED')
@@ -125,12 +126,6 @@ Installer.prototype.install = function (newVersion) {
         resolve(stdout)
       })
     })
-  }).then(installedVersion => {
-    const updateCheck = new UpdateCheck({
-      cachePath: this.cachePath
-    })
-
-    updateCheck.writeCache(installedVersion)
   })
 }
 

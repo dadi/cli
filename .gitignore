@@ -1,4 +1,6 @@
 .DS_Store
+wrapper/bin/*
+wrapper/cache.json
 
 # Logs
 logs

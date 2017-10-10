@@ -15,14 +15,16 @@ const updater = new UpdateCheck({
   cachePath
 })
 
-updater.checkForUpdates('cli-eb-test').then(newVersion => {
+updater.checkForUpdates().then(newVersion => {
   if (newVersion) {
     const installer = new Installer({
       cachePath,
       targetDirectory: __dirname
     })
 
-    return installer.install(newVersion)
+    return installer.install(newVersion).then(() => {
+      updater.installationHasFinished(newVersion)
+    })
   }
 }).catch(err => {
   if (err.code === 'EACCES') {
