@@ -1,5 +1,5 @@
 .DS_Store
-wrapper/bin/*
+wrapper/bin/dadi*
 wrapper/cache.json
 
 # Logs
