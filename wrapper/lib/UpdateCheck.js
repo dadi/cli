@@ -15,9 +15,9 @@ const UpdateCheck = function (options) {
 
 UpdateCheck.prototype.checkForUpdates = function () {
   return this.readCache().then(cache => {
-    if ((cache.timestamp + MAX_POLL_INTERVAL) <= Date.now()) {
+    if (!cache.timestamp || ((cache.timestamp + MAX_POLL_INTERVAL) <= Date.now())) {
       return this.getLatestVersion().then(remoteVersion => {
-        if (semverRangeCompare(remoteVersion, cache.version) > 0) {
+        if (!cache.version || (semverRangeCompare(remoteVersion, cache.version) > 0)) {
           return remoteVersion
         } else {
           this.writeCache(remoteVersion)
