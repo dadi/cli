@@ -1,6 +1,6 @@
 {
-  "name": "cli-eb-test",
-  "version": "2.22.0",
+  "name": "@dadi/cli",
+  "version": "2.0.0-beta",
   "description": "A command-line tool for installation and customisation of the DADI platform",
   "bin": {
     "dadi": "bin/runner"
@@ -17,12 +17,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/eduardoboucas/cli.git"
+    "url": "https://github.com/dadi/cli.git"
   },
   "bugs": {
-    "url": "https://github.com/eduardoboucas/cli/issues"
+    "url": "https://github.com/dadi/cli/issues"
   },
-  "homepage": "https://github.com/eduardoboucas/cli",
+  "homepage": "https://github.com/dadi/cli",
   "scripts": {
     "postinstall": "node install.js"
   }
