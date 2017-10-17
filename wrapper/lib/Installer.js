@@ -11,6 +11,7 @@ const Installer = function (options) {
   this.targetDirectory = options.targetDirectory
 
   this.binDirectory = path.join(options.targetDirectory, 'bin')
+  this.cachePath = options.cachePath
   this.target = path.join(this.binDirectory, 'dadi')
   this.targetTmp = `${this.target}.partial`
 }
@@ -115,6 +116,9 @@ Installer.prototype.install = function (newVersion) {
     // Create the runner file
     this.createRunner()
 
+    // Set permissions for cache file
+    this.setUpCache()
+
     if (newVersion) {
       return newVersion
     }
@@ -138,6 +142,15 @@ Installer.prototype.setExecPermissions = function (file) {
   const base8 = newMode.toString(8).slice(-3)
 
   fs.chmodSync(file, base8)   
+}
+
+Installer.prototype.setUpCache = function () {
+  fs.writeFileSync(
+    this.cachePath,
+    JSON.stringify({})
+  )
+
+  fs.chmodSync(this.cachePath, 0o777)
 }
 
 module.exports = Installer
