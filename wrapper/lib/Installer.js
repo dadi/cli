@@ -116,20 +116,18 @@ Installer.prototype.install = function (newVersion) {
     // Create the runner file
     this.createRunner()
 
-    // Set permissions for cache file
-    this.setUpCache()
-
     if (newVersion) {
       return newVersion
     }
 
-    return new Promise((resolve, reject) => {
-      exec(`${this.target} -v`, (error, stdout, stderr) => {
-        if (error) return reject(error)
-
-        resolve(stdout)
-      })
+    return fetch(
+      `${constants.registryUrl}/v1/cli.json`
+    ).then(res => res.json()).then(res => {
+      return res.version
     })
+  }).then(version => {
+    // Set permissions for cache file
+    return this.setUpCache(version).then(() => version)
   })
 }
 
@@ -144,13 +142,12 @@ Installer.prototype.setExecPermissions = function (file) {
   fs.chmodSync(file, base8)   
 }
 
-Installer.prototype.setUpCache = function () {
-  fs.writeFileSync(
-    this.cachePath,
-    JSON.stringify({})
-  )
+Installer.prototype.setUpCache = function (version) {
+  const updater = new UpdateCheck({
+    cachePath: this.cachePath
+  })
 
-  fs.chmodSync(this.cachePath, 0o777)
+  return updater.writeCache(version)
 }
 
 module.exports = Installer

@@ -6,22 +6,34 @@ const fs = require('fs')
 const path = require('path')
 const semverRangeCompare = require('semver-compare-range')
 
-const MAX_POLL_INTERVAL = 10
+// Cache TTL in milliseconds (one day)
+const CACHE_TTL = 24 * 60 * 60 * 1000
 
 const UpdateCheck = function (options) {
   this.cachePath = options.cachePath
   this.queue = null
 }
 
-UpdateCheck.prototype.checkForUpdates = function () {
+UpdateCheck.prototype.checkForUpdates = function (options) {
+  options = options || {}
+
   return this.readCache().then(cache => {
-    if (!cache.timestamp || ((cache.timestamp + MAX_POLL_INTERVAL) <= Date.now())) {
+    if (
+      options.forceUpdate ||
+      !cache.timestamp ||
+      (cache.timestamp + CACHE_TTL) <= Date.now()
+    ) {
       return this.getLatestVersion().then(remoteVersion => {
         if (!cache.version || (semverRangeCompare(remoteVersion, cache.version) > 0)) {
           return remoteVersion
         } else {
           this.writeCache(remoteVersion)
         }
+      }).catch(err => {
+        // If we get here, it means the API call to the registry has failed.
+        // To prevent CLI from working at all, we temporarily report that
+        // there isn't a new version available.
+        return Promise.resolve(null)
       })
     }
 
@@ -66,6 +78,8 @@ UpdateCheck.prototype.writeCache = function (version) {
 
     fs.writeFile(this.cachePath, JSON.stringify(payload), err => {
       if (err) return reject(err)
+
+      fs.chmodSync(this.cachePath, 0o777)
 
       return resolve()
     })
