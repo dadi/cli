@@ -31,7 +31,7 @@ Installer.prototype.createRunner = function () {
       'updater.js'
     )
   }
-  const contents = `node ${paths.updater} && ${paths.core} "$@"`
+  const contents = `node ${paths.updater} "$@" && ${paths.core} "$@"`
   
   fs.writeFileSync(paths.runner, contents)
 
