@@ -29,8 +29,9 @@ updater.checkForUpdates({
     })
   }
 }).catch(err => {
-  if (err.code === 'EACCES') {
-    console.log(`${colors.bold.red('ERROR:')} DADI CLI failed to write to disk.
+  switch (err.code) {
+    case 'EACCES':
+      console.log(`${colors.bold.red('ERROR:')} DADI CLI failed to write to disk.
 
 If you installed the ${colors.underline('@dadi/cli')} package as a super user\
  (i.e. ${colors.underline('sudo npm install @dadi/cli -g')}), you also need to run all DADI CLI\
@@ -40,6 +41,15 @@ Alternatively, see\
  ${colors.underline('https://docs.npmjs.com/getting-started/fixing-npm-permissions')}\
  for instructions on how to remove the need for using super user with your NPM installation.`)
 
-    process.exit(1)
+      break
+
+    case 'WRAPPER_UPDATE':
+      console.log(`${colors.bold.red('ERROR:')} DADI CLI needs a manual update.
+
+Please run ${colors.underline('npm update @dadi/cli -g')} to update it.`)
+
+      break
   }
+
+  process.exit(1)
 })

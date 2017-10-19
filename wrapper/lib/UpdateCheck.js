@@ -4,6 +4,9 @@ const constants = require('./constants')
 const fetch = require('node-fetch')
 const fs = require('fs')
 const path = require('path')
+const pkgJson = require(
+  path.join(__dirname, '..', 'package.json')
+)
 const semverRangeCompare = require('semver-compare-range')
 
 // Cache TTL in milliseconds (one day)
@@ -17,29 +20,39 @@ const UpdateCheck = function (options) {
 UpdateCheck.prototype.checkForUpdates = function (options) {
   options = options || {}
 
-  return this.readCache().then(cache => {
-    if (
-      options.forceUpdate ||
-      !cache.timestamp ||
-      (cache.timestamp + CACHE_TTL) <= Date.now()
-    ) {
-      return this.getLatestVersion().then(remoteVersion => {
-        if (!cache.version || (semverRangeCompare(remoteVersion, cache.version) > 0)) {
-          return remoteVersion
-        } else {
-          this.writeCache(remoteVersion)
-        }
-      }).catch(err => {
-        // If we get here, it means the API call to the registry has failed.
-        // To prevent CLI from working at all, we temporarily report that
-        // there isn't a new version available.
-        return Promise.resolve(null)
-      })
-    }
+  return new Promise((resolve, reject) => {
+    this.readCache().then(cache => {
+      if (
+        options.forceUpdate ||
+        !cache.timestamp ||
+        (cache.timestamp + CACHE_TTL) <= Date.now()
+      ) {
+        return this.getLatestVersion().then(remoteVersions => {
+          if (remoteVersions.wrapper !== pkgJson.version) {
+            const error = new Error('@dadi/cli needs a manual update')
 
-    return null
-  }).catch(err => {
-    return this.getLatestVersion()
+            error.code = 'WRAPPER_UPDATE'
+
+            return reject(error)
+          }
+
+          if (!cache.version || (semverRangeCompare(remoteVersions.core, cache.version) > 0)) {
+            return resolve(remoteVersions.core)
+          }
+
+          this.writeCache(remoteVersions.core)
+
+          return resolve(null)
+        }).catch(err => {
+          // If we get here, it means the API call to the registry has failed.
+          // To prevent CLI from working at all, we temporarily report that
+          // there isn't a new version available.
+          return resolve(null)
+        })
+      }
+    }).catch(err => {
+      return this.getLatestVersion().then(remoteVersions => resolve(remoteVersions.core))
+    })
   })
 }
 
@@ -47,7 +60,10 @@ UpdateCheck.prototype.getLatestVersion = function () {
   return fetch(constants.registryUrl + '/v1/cli.json').then(res => {
     return res.json()
   }).then(res => {
-    return res.version
+    return {
+      core: res.versionCore,
+      wrapper: res.versionWrapper
+    }
   })
 }
 
