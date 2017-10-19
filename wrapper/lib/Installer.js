@@ -123,7 +123,7 @@ Installer.prototype.install = function (newVersion) {
     return fetch(
       `${constants.registryUrl}/v1/cli.json`
     ).then(res => res.json()).then(res => {
-      return res.version
+      return res.versionCore
     })
   }).then(version => {
     // Set permissions for cache file
