@@ -40,19 +40,17 @@ UpdateCheck.prototype.checkForUpdates = function (options) {
             return resolve(remoteVersions.core)
           }
 
-          this.writeCache(remoteVersions.core)
-
-          return resolve(null)
+          this.writeCache(remoteVersions.core).then(() => {
+            resolve(null)
+          }).catch(reject)
         }).catch(err => {
           // If we get here, it means the API call to the registry has failed.
-          // To prevent CLI from working at all, we temporarily report that
+          // We temporarily report that
           // there isn't a new version available.
           return resolve(null)
         })
       }
-    }).catch(err => {
-      return this.getLatestVersion().then(remoteVersions => resolve(remoteVersions.core))
-    })
+    }).catch(reject)
   })
 }
 
@@ -75,12 +73,16 @@ UpdateCheck.prototype.readCache = function (rejectOnFailure) {
   return new Promise((resolve, reject) => {
     const timestamp = new Date().getTime()
 
-    fs.readFile(this.cachePath, (err, data) => {
+    fs.access(this.cachePath, (fs.constants || fs).W_OK, err => {
       if (err) return reject(err)
 
-      const parsedData = JSON.parse(data)
+      fs.readFile(this.cachePath, (err, data) => {
+        if (err) return reject(err)
 
-      return resolve(parsedData)
+        const parsedData = JSON.parse(data)
+
+        return resolve(parsedData)
+      })
     })
   })
 }
@@ -95,9 +97,11 @@ UpdateCheck.prototype.writeCache = function (version) {
     fs.writeFile(this.cachePath, JSON.stringify(payload), err => {
       if (err) return reject(err)
 
-      fs.chmodSync(this.cachePath, 0o777)
+      fs.chmod(this.cachePath, 0o777, err => {
+        if (err) return reject(err)
 
-      return resolve()
+        return resolve()
+      })
     })
   })
 }
