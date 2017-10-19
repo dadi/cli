@@ -37,6 +37,8 @@ module.exports.start = () => {
     }
   } else if (args.v) {
     return pkg.version
+  } else if (args._[0] === 'update') {
+    return `DADI CLI updated to version ${pkg.version}`
   } else if (args._[0] && entryPoints[args._[0]]) {
     if (typeof entryPoints[args._[0]].commands[args._[1]] === 'function') {
       return entryPoints[args._[0]].commands[args._[1]](args)

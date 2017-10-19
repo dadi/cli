@@ -15,17 +15,9 @@ const updater = new UpdateCheck({
   cachePath
 })
 
-const isForceUpdate = process.argv[2] === 'update'
-
 updater.checkForUpdates({
-  forceUpdate: isForceUpdate
+  forceUpdate: process.argv[2] === 'update'
 }).then(newVersion => {
-  if (isForceUpdate) {
-    process.exit(1)
-
-    return
-  }
-
   if (newVersion) {
     const installer = new Installer({
       cachePath,
