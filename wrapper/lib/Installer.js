@@ -1,3 +1,4 @@
+const colors = require('colors')
 const constants = require('./constants')
 const exec = require('child_process').exec
 const fetch = require('node-fetch')
@@ -80,7 +81,32 @@ Installer.prototype.install = function (newVersion) {
   return fetch(binaryUrl, {
     compress: false
   }).then(res => {
-    fs.accessSync(this.binDirectory, (fs.constants || fs).W_OK)
+    try {
+      fs.accessSync(this.binDirectory, (fs.constants || fs).W_OK)
+    } catch (err) {
+      console.log(`---------------------------------------------
+
+${colors.bold.red('ERROR:')} DADI CLI does not have the correct permissions.
+
+This typically happens when your npm installation is configured in such a way that global installs
+require super-user permissions, which is not recommended.\
+
+To fix this, follow the instructions on ${colors.underline('https://docs.npmjs.com/getting-started/fixing-npm-permissions')}.
+
+Alternatively, if you're happy with using super-user, you'll need to install DADI CLI with the
+${colors.underline('unsafe-perm')} flag, so that the install script gets the right permissions.
+
+${colors.underline('sudo npm install @dadi/cli -g --unsafe-perm')}
+
+You can read more about what it does at ${colors.underline('https://docs.npmjs.com/misc/config#unsafe-perm')}.
+
+---------------------------------------------
+`)
+
+      process.exit(1)
+
+      return Promise.reject()
+    }
 
     const size = parseInt(res.headers.get('content-length'), 10)
     const writer = fs.createWriteStream(this.targetTmp)
