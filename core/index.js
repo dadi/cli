@@ -5,5 +5,5 @@ Promise.resolve(cli.start())
     if (output) console.log(output)
   })
   .catch(err => {
-    if (err) console.log(err)
+    if (err && global.debugMode) console.log(err)
   })

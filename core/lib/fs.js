@@ -69,6 +69,19 @@ FsHelpers.prototype.loadAppFile = function (name, {
   })
 }
 
+FsHelpers.prototype.readFile = function (filePath, {
+  baseDirectory = '.'
+} = {}) {
+  return fs.readFile(
+    path.resolve(
+      process.cwd(),
+      baseDirectory,
+      filePath
+    ),
+    'utf8'
+  )
+}
+
 FsHelpers.prototype.warnIfDirectoryIsNotEmpty = function ({
   directory,
   message
@@ -101,8 +114,10 @@ FsHelpers.prototype.warnIfDirectoryIsNotEmpty = function ({
     })
     .catch(err => {
       if (err.code === 'ENOENT') {
-        return Promise.resolve(null)
+        return null
       }
+
+      return Promise.reject(err)
     })
 
   return shouldAbort

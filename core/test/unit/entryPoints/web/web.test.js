@@ -8,8 +8,4 @@ describe('Web entry point', () => {
   it('exports a `new` command', () => {
     expect(web.commands['new']).toBeInstanceOf(Function)
   })
-
-  it('exports a `routes:list` command', () => {
-    expect(web.commands['routes:list']).toBeInstanceOf(Function)
-  })
 })
