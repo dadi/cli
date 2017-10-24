@@ -212,10 +212,14 @@ describe('Web `new` command', () => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
       })
 
+      mockInquirer.setAnswer({
+        engines: []
+      })
+
       const request = nock(registryUrl)
         .get('/-/v1/search')
         .query({
-          text: 'dadi web'
+          text: 'dadi-web-engine'
         })
         .reply(200, {objects: []})
 
@@ -235,23 +239,29 @@ describe('Web `new` command', () => {
         {
           package: {
             name: '@dadi/web-dustjs',
+            scope: 'dadi',
             description: 'A Dust.js interface for DADI Web',
-            keywords: ['dadi', 'web']
+            keywords: ['dadi-web-engine']
           }
         },
         {
           package: {
             name: '@dadi/web-pugjs',
+            scope: 'dadi',
             description: 'A Pug.js interface for DADI Web',
-            keywords: ['dadi', 'web']
+            keywords: ['dadi-web-engine']
           }
         }
       ]
 
+      mockInquirer.setAnswer({
+        engines: []
+      })
+
       const request = nock(registryUrl)
         .get('/-/v1/search')
         .query({
-          text: 'dadi web'
+          text: 'dadi-web-engine'
         })
         .reply(200, {objects: availableEngines})
 
@@ -283,15 +293,17 @@ describe('Web `new` command', () => {
         {
           package: {
             name: '@dadi/web-dustjs',
+            scope: 'dadi',
             description: 'A Dust.js interface for DADI Web',
-            keywords: ['dadi', 'web']
+            keywords: ['dadi-web-engine']
           }
         },
         {
           package: {
             name: '@dadi/web-pugjs',
+            scope: 'dadi',
             description: 'A Pug.js interface for DADI Web',
-            keywords: ['dadi', 'web']
+            keywords: ['dadi-web-engine']
           }
         }
       ]
@@ -303,7 +315,7 @@ describe('Web `new` command', () => {
       const request = nock(registryUrl)
         .get('/-/v1/search')
         .query({
-          text: 'dadi web'
+          text: 'dadi-web-engine'
         })
         .reply(200, {objects: availableEngines})
 
@@ -344,15 +356,17 @@ describe('Web `new` command', () => {
         {
           package: {
             name: '@dadi/web-dustjs',
+            scope: 'dadi',
             description: 'A Dust.js interface for DADI Web',
-            keywords: ['dadi', 'web']
+            keywords: ['dadi-web-engine']
           }
         },
         {
           package: {
             name: '@dadi/web-pugjs',
+            scope: 'dadi',
             description: 'A Pug.js interface for DADI Web',
-            keywords: ['dadi', 'web']
+            keywords: ['dadi-web-engine']
           }
         }
       ]
@@ -368,7 +382,7 @@ describe('Web `new` command', () => {
       const request = nock(registryUrl)
         .get('/-/v1/search')
         .query({
-          text: 'dadi web'
+          text: 'dadi-web-engine'
         })
         .reply(200, {objects: availableEngines})
 
