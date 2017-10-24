@@ -105,17 +105,14 @@ module.exports = args => {
             ? args.engine
             : [args.engine]
         } else {
-          const filterFn = result => {
-            return result.package &&
-              result.package.keywords &&
-              result.package.keywords.includes('web')
-          }
-
           const npmMessage = shell.showSpinner('Pulling the list of available template engines from NPM')
 
           engines = npm.search({
-            filter: filterFn,
-            text: 'dadi web'
+            filter: result => {
+              return npm.filters.hasKeyword(result, 'dadi-web-engine') &&
+                npm.filters.isTrusted(result)
+            },
+            text: 'dadi-web-engine'
           }).then(response => {
             npmMessage.succeed()
 
@@ -139,6 +136,8 @@ module.exports = args => {
               .then(answers => answers.engines)
           }).catch(err => { // eslint-disable-line handle-callback-err
             npmMessage.fail('Could not connect to NPM registry. Are you connected to the Internet?')
+
+            return Promise.reject(err)
           })
         }
       }
