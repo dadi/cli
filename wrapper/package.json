@@ -1,6 +1,6 @@
 {
   "name": "@dadi/cli",
-  "version": "2.0.9-beta",
+  "version": "2.1.0",
   "description": "A command-line tool for installation and customisation of the DADI platform",
   "bin": {
     "dadi": "bin/runner"
