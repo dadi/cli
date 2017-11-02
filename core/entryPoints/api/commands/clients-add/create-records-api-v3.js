@@ -54,16 +54,18 @@ module.exports = ({
 
       connected = true
 
-      db.find({
+      const query = {
         clientId: clientId
-      }, clientCollectionName, {}, getClientStoreSchema()).then(existingClients => {
+      }
+
+      db.find({ query, collection: clientCollectionName, options: {}, schema: getClientStoreSchema() }).then(existingClients => {
         if (existingClients.results.length > 0) {
           shell.killProcess()
 
           return reject(new Error('ID_EXISTS'))
         }
 
-        db.insert(payload, clientCollectionName, getClientStoreSchema()).then(result => {
+        db.insert({ data: payload, collection: clientCollectionName, schema: getClientStoreSchema() }).then(result => {
           shell.killProcess()
 
           return resolve(result)
