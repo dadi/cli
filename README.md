@@ -13,15 +13,15 @@ DADI CLI is a command-line tool to help with the installation and customisation 
 
 ## Installation
 
-DADI CLI is installed with npm, as a global module.
+DADI CLI is installed with NPM, as a global module.
 
  ```
  npm install @dadi/cli -g
  ```
 
- Depending on how your npm installation is configured, you might require super-user permissions to install a global module. This means that your regular user does not have permissions to write to the directories that npm uses to store global packages and commands. You can fix this by following the instructions on thr [npm documentation pages](https://docs.npmjs.com/getting-started/fixing-npm-permissions).
+ Depending on how your NPM installation is configured, you might require super-user permissions to install a global module. This means that your regular user does not have permissions to write to the directories that NPM uses to store global packages and commands. You can fix this by following the instructions on the [NPM documentation pages](https://docs.npmjs.com/getting-started/fixing-npm-permissions).
 
- If you don't mind using the super-user to install global npm modules, you need to install DADI CLI using the [`--unsafe-perm`](https://docs.npmjs.com/misc/config#unsafe-perm) flag.
+ If you don't mind using the super-user to install global NPM modules, you need to install DADI CLI using the [`--unsafe-perm`](https://docs.npmjs.com/misc/config#unsafe-perm) flag.
 
 ```
 npm install @dadi/cli -g --unsafe-perm
