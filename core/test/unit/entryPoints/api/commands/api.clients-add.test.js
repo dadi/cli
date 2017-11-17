@@ -105,7 +105,7 @@ describe('API `clients:add` command', () => {
         }
 
         setMockInquirerAnswer(mockAnswers)
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
@@ -130,7 +130,7 @@ describe('API `clients:add` command', () => {
           id: 'existingClient',
           secret: 'superSecret',
           type: 'admin'
-        }      
+        }
 
         setMockInquirerAnswer(mockAnswers)
 
@@ -139,13 +139,12 @@ describe('API `clients:add` command', () => {
             clientId: mockAnswers.id
           }
         ]
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockAnswers.id} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
-
           expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
           expect(mockDatabase.insert).not.toHaveBeenCalled()
 
@@ -241,7 +240,7 @@ describe('API `clients:add` command', () => {
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret}`
         )
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
@@ -255,7 +254,7 @@ describe('API `clients:add` command', () => {
           clientId: 'existingClient',
           secret: 'mySecret',
           type: 'admin'
-        }      
+        }
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
         )
@@ -359,13 +358,12 @@ describe('API `clients:add` command', () => {
         }
 
         setMockInquirerAnswer(mockAnswers)
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
-
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual({
+          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockAnswers.id)
+          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual({
             clientId: mockAnswers.id,
             secret: mockAnswers.secret,
             type: mockAnswers.type
@@ -381,7 +379,7 @@ describe('API `clients:add` command', () => {
           id: 'existingClient',
           secret: 'superSecret',
           type: 'admin'
-        }      
+        }
 
         setMockInquirerAnswer(mockAnswers)
 
@@ -390,14 +388,14 @@ describe('API `clients:add` command', () => {
             clientId: mockAnswers.id
           }
         ]
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockAnswers.id} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
+          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockAnswers.id)
           expect(mockDatabase.insert).not.toHaveBeenCalled()
 
           expect(mockShellKillProcess).toHaveBeenCalled()
@@ -415,13 +413,13 @@ describe('API `clients:add` command', () => {
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
         )
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual(mockArgs)
+          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockArgs.clientId)
+          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual(mockArgs)
 
           expect(mockShellKillProcess).toHaveBeenCalled()
         })
@@ -436,13 +434,13 @@ describe('API `clients:add` command', () => {
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret}`
         )
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual(mockArgs)
+          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockArgs.clientId)
+          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual(mockArgs)
 
           expect(mockShellKillProcess).toHaveBeenCalled()
         })
@@ -453,7 +451,7 @@ describe('API `clients:add` command', () => {
           clientId: 'existingClient',
           secret: 'mySecret',
           type: 'admin'
-        }      
+        }
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
         )
@@ -463,14 +461,14 @@ describe('API `clients:add` command', () => {
             clientId: mockArgs.clientId
           }
         ]
-        
+
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockArgs.clientId} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
+          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockArgs.clientId)
           expect(mockDatabase.insert).not.toHaveBeenCalled()
 
           expect(mockShellKillProcess).toHaveBeenCalled()

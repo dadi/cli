@@ -74,7 +74,7 @@ const renderQuestions = () => {
     {
       type: 'list',
       name: 'type',
-      message: 'What is the secret?',
+      message: 'What type of access does the user require?',
       choices: ['user', 'admin']
     }
   ]
