@@ -16,6 +16,7 @@ const createClient = ({clientId, message, secret, type}) => {
     }),
     resolveLevel: () => {}
   })
+
   console.log = function () {}
 
   return fsHelpers.loadApp('@dadi/api').then(app => {
@@ -75,7 +76,16 @@ const renderQuestions = () => {
       type: 'list',
       name: 'type',
       message: 'What type of access does the user require?',
-      choices: ['user', 'admin']
+      choices: [
+        {
+          name: 'Regular user',
+          value: 'user'
+        },
+        {
+          name: 'Administrator',
+          value: 'admin'
+        }
+      ]
     }
   ]
 
@@ -84,8 +94,9 @@ const renderQuestions = () => {
 }
 
 module.exports = args => {
+  const message = shell.showSpinner('Creating a new client')
+
   if (args.id || args.secret) {
-    const message = shell.showSpinner('Creating a new client')
     const invalidArgs = ['id', 'secret'].filter(arg => {
       return (
         typeof args[arg] !== 'string' ||
@@ -107,8 +118,6 @@ module.exports = args => {
     })
   } else {
     return renderQuestions().then(answers => {
-      const message = shell.showSpinner('Creating a new client')
-
       return createClient({
         clientId: answers.id,
         message,
@@ -119,6 +128,7 @@ module.exports = args => {
   }
 }
 
+module.exports.createClient = createClient
 module.exports.description = 'Creates a new client'
 module.exports.parameters = {
   flags: [

@@ -21,6 +21,12 @@ mockSpinnerFactory.prototype.succeed = function (newMessage) {
   return this
 }
 
+mockSpinnerFactory.prototype.warn = function (newMessage) {
+  this.callback(newMessage || this.message, 'warn')
+
+  return this
+}
+
 let mockSpinner
 let mockSpinnerOutput = jest.fn()
 

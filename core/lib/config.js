@@ -1,17 +1,19 @@
 'use strict'
 
+const colors = require('colors')
 const fs = require('fs')
 const fsHelpers = require('./fs')
 const path = require('path')
+const shellHelpers = require('./shell')
 
 const ConfigHelpers = function () {}
 
 ConfigHelpers.prototype._getConfigFilePath = function ({
-  environment,
+  fileName = 'config.development.json',
   sample = false,
   timestamp = false
 }) {
-  let filePath = `config/config.${environment}.json`
+  let filePath = path.join('config', fileName)
 
   if (sample) {
     filePath += '.sample'
@@ -26,13 +28,14 @@ ConfigHelpers.prototype._getConfigFilePath = function ({
 
 ConfigHelpers.prototype.getAppConfig = function ({
   app,
-  baseDirectory = '.'
+  baseDirectory = '.',
+  fileName
 }) {
   const configFilePath = path.join(
     process.cwd(),
     baseDirectory,
     this._getConfigFilePath({
-      environment: 'development',
+      fileName,
       sample: false
     })
   )
@@ -58,9 +61,7 @@ ConfigHelpers.prototype.getAppConfig = function ({
     }).then(config => {
       if (createdTemporaryConfigFile) {
         return new Promise((resolve, reject) => {
-          fs.unlink(configFilePath, err => {
-            return resolve(err)
-          })
+          fs.unlink(configFilePath, resolve)
         }).then(() => config)
       }
 
@@ -75,15 +76,20 @@ ConfigHelpers.prototype.saveAppConfig = function ({
   app,
   baseDirectory = '.',
   config,
-  environment
+  description = 'Configuration file',
+  fileName,
+  prefix,
+  showSpinner = true
 }) {
   const configFilePath = path.join(
     process.cwd(),
     baseDirectory,
     this._getConfigFilePath({
-      environment
+      fileName
     })
   )
+
+  const spinner = showSpinner && shellHelpers.showSpinner('Writing files')
 
   return fsHelpers
     .fileExists(configFilePath)
@@ -92,7 +98,7 @@ ConfigHelpers.prototype.saveAppConfig = function ({
         process.cwd(),
         baseDirectory,
         this._getConfigFilePath({
-          environment,
+          fileName,
           timestamp: true
         })
       )
@@ -132,6 +138,27 @@ ConfigHelpers.prototype.saveAppConfig = function ({
       }
 
       return response
+    }).then(result => {
+      let message = `${description} written to ${colors.underline(result.path)}.`
+
+      if (spinner) {
+        if (result.backupPath) {
+          spinner.warn(
+            message +
+            ` A file already existed at that location, so it was backed up to ${colors.underline(result.backupPath)}.`
+          )
+        } else {
+          spinner.succeed(message)
+        }
+      }
+
+      return result
+    }).catch(err => {
+      if (spinner) {
+        spinner.fail('An unexpected error occurred when writing the configuration file.')
+      }
+
+      return Promise.reject(err)
     })
 }
 

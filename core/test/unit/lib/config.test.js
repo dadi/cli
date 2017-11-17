@@ -1,3 +1,6 @@
+require('./../../helpers/disable-colours')
+
+const mockSpinner = require('./../../helpers/MockSpinner')
 const path = require('path')
 const getTime = Date.prototype.getTime
 
@@ -7,32 +10,32 @@ beforeEach(() => {
 
 describe('Config utility', () => {
   describe('builds the path to an app\'s config file', () => {
-    test('given an environment', () => {
+    test('given a filename', () => {
       const config = require('./../../../lib/config')
       const configPath = config._getConfigFilePath({
-        environment: 'qa'
+        fileName: 'config.qa.json'
       })
 
       expect(configPath).toBe('config/config.qa.json')
     })
 
-    test('given an environment and the sample parameter', () => {
+    test('given a filename and the sample parameter', () => {
       const config = require('./../../../lib/config')
       const configPath = config._getConfigFilePath({
-        environment: 'qa',
+        fileName: 'config.qa.json',
         sample: true
       })
 
       expect(configPath).toBe('config/config.qa.json.sample')
     })
 
-    test('given an environment and the timestamp parameter', () => {
+    test('given a filename and the timestamp parameter', () => {
       const config = require('./../../../lib/config')
 
       Date.prototype.getTime = () => 123456789
 
       const configPath = config._getConfigFilePath({
-        environment: 'qa',
+        fileName: 'config.qa.json',
         timestamp: true
       })
 
@@ -147,11 +150,16 @@ describe('Config utility', () => {
       return config.saveAppConfig({
         app: '@dadi/api',
         config: mockNewConfig,
-        environment: 'development'
+        fileName: 'config.development.json',
       }).then(config => {
         expect(mockWriteFile.mock.calls[0][0]).toBe(configFilePath)
         expect(mockWriteFile.mock.calls[0][1]).toBe(JSON.stringify(mockNewConfig, null, 2))
         expect(mockWriteFile).toHaveBeenCalledTimes(1)
+
+        expect(mockSpinner.mock.calls[0][0]).toBe('Writing files')
+        expect(mockSpinner.mock.calls[0][1]).toBe('start')
+        expect(mockSpinner.mock.calls[1][0]).toBe(`Configuration file written to ${config.path}.`)
+        expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
         expect(config.path).toBe(configFilePath)
       })
@@ -200,7 +208,7 @@ describe('Config utility', () => {
       return config.saveAppConfig({
         app: '@dadi/api',
         config: mockNewConfig,
-        environment: 'development'
+        fileName: 'config.development.json',
       }).then(config => {
         expect(mockReadFile.mock.calls[0][0]).toBe(configFilePath)
 
@@ -209,6 +217,11 @@ describe('Config utility', () => {
         expect(mockWriteFile.mock.calls[1][0]).toBe(configFilePath)
         expect(mockWriteFile.mock.calls[1][1]).toBe(JSON.stringify(mockNewConfig, null, 2))
         expect(mockWriteFile).toHaveBeenCalledTimes(2)
+
+        expect(mockSpinner.mock.calls[0][0]).toBe('Writing files')
+        expect(mockSpinner.mock.calls[0][1]).toBe('start')
+        expect(mockSpinner.mock.calls[1][0]).toBe(`Configuration file written to ${config.path}. A file already existed at that location, so it was backed up to ${config.backupPath}.`)
+        expect(mockSpinner.mock.calls[1][1]).toBe('warn')
 
         expect(config.path).toBe(configFilePath)
         expect(config.backupPath).toBe(backupFilePath)

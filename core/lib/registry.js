@@ -1,5 +1,6 @@
 'use strict'
 
+const constants = require('./../../shared/constants')
 const fetch = require('node-fetch')
 const fs = require('fs-extra')
 const path = require('path')
@@ -8,24 +9,7 @@ const semverRangeCompare = require('semver-compare-range')
 const shell = require('./shell')
 const unzip = require('decompress')
 
-const RegistryHelpers = function () {
-  this.apiUrl = 'https://dadi.github.io/registry'
-  this.registryUrl = 'https://dadi.github.io/registry'
-  this.repoUrl = 'git@github.com:dadi/registry.git'
-}
-
-RegistryHelpers.prototype.clonePath = function ({
-  remotePath,
-  repo = this.repoUrl,
-  targetDirectory
-}) {
-  const command = `rm -rf ${targetDirectory}/_temp && mkdir -p ${targetDirectory}/_temp && \
-cd ${targetDirectory}/_temp && git init && git remote add -f origin ${repo} && \
-git config core.sparseCheckout true && echo "${remotePath}" >> .git/info/sparse-checkout && \
-git pull origin master && mv ${remotePath}/* ../ && cd .. && rm -rf _temp`
-
-  return command
-}
+const RegistryHelpers = function () {}
 
 RegistryHelpers.prototype.downloadBoilerplate = function ({
   product,
@@ -44,9 +28,11 @@ RegistryHelpers.prototype.downloadBoilerplate = function ({
       : '') + 'npm start'
 
   return this.downloadFile({
-    file: `${product}/boilerplate/${version}.zip`,
+    file: `boilerplates/${product}/${version}.zip`,
     progressCallback: percentage => {
-      spinner.text = `${spinnerMessage} (${percentage}%)`
+      if (!isNaN(percentage)) {
+        spinner.text = `${spinnerMessage} (${percentage}%)`
+      }
     },
     target: targetDirectory
   }).then(res => {
@@ -67,9 +53,9 @@ RegistryHelpers.prototype.downloadBoilerplate = function ({
 
     return launchCommand
   }).catch(err => {
-    spinner.fail()
+    spinner.fail('The connection to the DADI registry has failed. Are you connected to the Internet?')
 
-    return err
+    return Promise.reject(err)
   })
 }
 
@@ -79,7 +65,7 @@ RegistryHelpers.prototype.downloadFile = function ({
   target: targetDirectory = process.cwd(),
   unzip: shouldUnzip = true
 }) {
-  const binaryUrl = `${this.registryUrl}/${file}`
+  const binaryUrl = `${constants.registryUrl}/${file}`
   const fileName = binaryUrl.split('/').pop()
   const target = path.join(
     targetDirectory,
@@ -144,7 +130,7 @@ RegistryHelpers.prototype.downloadFile = function ({
 RegistryHelpers.prototype.getBoilerplateVersions = function (product) {
   return request({
     json: true,
-    uri: this.apiUrl + '/versions.json'
+    uri: constants.apiUrl + '/v1/boilerplates.json'
   }).then(response => {
     if (!response[product]) return []
 

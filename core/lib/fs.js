@@ -6,6 +6,15 @@ const path = require('path')
 
 const FsHelpers = function () {}
 
+FsHelpers.prototype.cd = function (directory) {
+  process.chdir(
+    path.resolve(
+      process.cwd(),
+      directory
+    )
+  )
+}
+
 FsHelpers.prototype.fileExists = function (file) {
   return fs.stat(path.resolve(process.cwd(), file))
     .then(stats => true)

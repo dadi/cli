@@ -1,10 +1,11 @@
+const constants = require('./../../../../shared/constants')
 const nock = require('nock')
 const registry = require('./../../../lib/registry')
 
 describe('registry utility', () => {
   test('makes a request to the correct API endpoint', () => {
-    const request = nock(registry.apiUrl)
-      .get('/versions.json')
+    const request = nock(constants.apiUrl)
+      .get('/v1/boilerplates.json')
       .reply(200, {})
 
     return registry.getBoilerplateVersions('api').then(versions => {
@@ -13,8 +14,8 @@ describe('registry utility', () => {
   })
 
   test('returns the versions for the given product sorted by semver version/range', () => {
-    const request = nock(registry.apiUrl)
-      .get('/versions.json')
+    const request = nock(constants.apiUrl)
+      .get('/v1/boilerplates.json')
       .reply(200, {
         api: ['1.1.x', '1.0', '2.x', '3.x', '0.1'],
         cdn: [],
@@ -28,8 +29,8 @@ describe('registry utility', () => {
   })
 
   test('returns an empty array when supplied with an invalid product', () => {
-    const request = nock(registry.apiUrl)
-      .get('/versions.json')
+    const request = nock(constants.apiUrl)
+      .get('/v1/boilerplates.json')
       .reply(200, {
         api: [],
         cdn: [],
@@ -43,8 +44,8 @@ describe('registry utility', () => {
   })
 
   test('returns a rejected Promise if the request fails', () => {
-    const request = nock(registry.apiUrl)
-      .get('/versions.json')
+    const request = nock(constants.apiUrl)
+      .get('/v1/boilerplates.json')
       .reply(500)
 
     return registry.getBoilerplateVersions('api').catch(error => {

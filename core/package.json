@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/dadi/cli",
   "scripts": {
-    "test": "standard && jest && node test/utils/coverage.js",
+    "test": "standard --fix && jest && node test/utils/coverage.js",
     "test-dev": "jest --watch",
     "build": "pkg index.js -c package.json -o bin/dadi"
   },
@@ -58,6 +58,7 @@
     ],
     "coverageReporters": [
       "cobertura",
+      "html",
       "text"
     ],
     "testMatch": [

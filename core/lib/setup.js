@@ -16,12 +16,12 @@ Setup.prototype.setTitle = function (title) {
   this.title = title
 }
 
-Setup.prototype.start = function () {
+Setup.prototype.start = function (initialState = {}) {
   const numberOfQuestions = this.steps.reduce((items, step) => {
     return items + step.questions.length
   }, 0)
 
-  let answers
+  let answers = initialState
   let queue = Promise.resolve()
   let questionsAnswered = 0
 
@@ -40,6 +40,25 @@ Setup.prototype.start = function () {
     }
 
     step.questions.forEach(question => {
+      if (question.type === 'info') {
+        queue = queue.then(() => {
+          if (
+            typeof question.condition !== 'function' ||
+            question.condition(answers)
+          ) {
+            shellHelpers.showSpinner(question.message, 'info')
+          }
+        })
+
+        return
+      }
+
+      // If we already an answer for this question (i.e. it was supplied as part
+      // of the initial state), we skip it.
+      if (objectPath.get(answers, question.name) !== undefined) {
+        return
+      }
+
       const fieldSchema = objectPath.get(this.schema, question.name) || {}
 
       // Choices and list format
@@ -49,6 +68,20 @@ Setup.prototype.start = function () {
 
       if (question.choices) {
         question.type = 'list'
+
+        if (typeof question.choices === 'function') {
+          const preFn = question.choices
+
+          queue = queue.then(() => {
+            const preFnSpinner = shellHelpers.showSpinner('Crunching some numbers')
+
+            return preFn().then(result => {
+              preFnSpinner.stop()
+
+              question.choices = result
+            })
+          })
+        }
       }
 
       if (typeof fieldSchema.format === 'function') {
@@ -69,8 +102,14 @@ Setup.prototype.start = function () {
       }
 
       // Default value
-      if ((question.default === undefined) && fieldSchema.default) {
-        question.default = fieldSchema.default
+      if (question.default === undefined) {
+        if (fieldSchema.default) {
+          question.default = fieldSchema.default
+        }
+      } else if (typeof question.default === 'function') {
+        queue = queue.then(() => {
+          question.default = question.default(answers)
+        })
       }
 
       // Message
@@ -103,7 +142,7 @@ Setup.prototype.start = function () {
     shellHelpers.showText('')
 
     return answers
-  })
+  }).catch(console.log)
 }
 
 module.exports = Setup

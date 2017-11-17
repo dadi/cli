@@ -9,10 +9,17 @@ const path = require('path')
 const registry = require('./../../../../../lib/registry')
 
 const apiNew = require('./../../../../../entryPoints/api/commands/new')
+const apiSetup = require('./../../../../../entryPoints/api/commands/setup')
 
 beforeEach(() => {
+  apiSetup.run = jest.fn(() => Promise.resolve())
+
   fs.readdir = jest.fn(path => {
     return Promise.resolve([])
+  })
+
+  fs.writeFile = jest.fn((filePath, contents, callback) => {
+    callback(null)
   })
 
   registry.downloadBoilerplate = jest.fn(() => {
@@ -25,9 +32,9 @@ describe('API `new` command', () => {
     expect(typeof apiNew.description).toBe('string')
   })
 
-  test('pings the versions API endpoint to get the list of available versions for the given product', () => {
+  test.only('pings the versions API endpoint to get the list of available versions for the given product', () => {
     const args = argsHelper.getArgsForCommand('dadi api new')
-    
+
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.0', '2.0'])
     })

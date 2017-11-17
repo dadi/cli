@@ -2,7 +2,7 @@
 
 const colors = require('colors')
 const configHelpers = require('./../../../lib/config')
-const path = require('path')
+const fsHelpers = require('./../../../lib/fs')
 const Setup = require('./../../../lib/setup')
 const shellHelpers = require('./../../../lib/shell')
 
@@ -278,7 +278,8 @@ const launchSetup = () => {
   const app = '@dadi/cdn'
 
   return configHelpers.getAppConfig({
-    app
+    app,
+    fileName: 'config.development.json'
   }).then(config => {
     const setup = new Setup(steps, config.schema)
 
@@ -291,7 +292,7 @@ const launchSetup = () => {
     return configHelpers.saveAppConfig({
       app,
       config: answers,
-      environment: answers.env
+      fileName: `config.${answers.env}.json`
     }).then(result => {
       let message = `Configuration file written to ${colors.underline(result.path)}.`
 
@@ -315,12 +316,7 @@ const launchSetup = () => {
 
 module.exports = args => launchSetup()
 module.exports.run = baseDirectory => {
-  process.chdir(
-    path.resolve(
-      process.cwd(),
-      baseDirectory
-    )
-  )
+  fsHelpers.cd(baseDirectory)
 
   return launchSetup()
 }
