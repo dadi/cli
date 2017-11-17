@@ -137,8 +137,8 @@ module.exports.description = 'Creates a new instance of DADI API'
 module.exports.parameters = {
   inline: [
     {
-      key: 'name',
-      description: 'the name of the DADI API instance'
+      key: 'directory',
+      description: 'the name of the directory where DADI API will be installed'
     }
   ],
   flags: [
