@@ -123,7 +123,7 @@ FsHelpers.prototype.warnIfDirectoryIsNotEmpty = function ({
     })
     .catch(err => {
       if (err.code === 'ENOENT') {
-        return null
+        return false
       }
 
       return Promise.reject(err)
