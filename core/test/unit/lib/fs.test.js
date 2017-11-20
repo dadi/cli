@@ -65,4 +65,78 @@ describe('FS utility', () => {
       })
     })
   })
+
+  describe('requires an app file from the filesystem', () => {
+    test('returns the loaded file if it exists', () => {
+      const fsHelpers = require('./../../../lib/fs')
+
+      return fsHelpers.loadAppFile('@dadi/some-app', {
+        filePath: 'some-file.json'
+      }).then(file => {
+        expect(file.name).toBe('@dadi/api')
+      })
+    })
+
+    test('returns an error if the file fails to load', () => {
+      const fsHelpers = require('./../../../lib/fs')
+
+      return fsHelpers.loadAppFile('@dadi/some-app', {
+        filePath: 'some-other-file.json'
+      }).catch(err => {
+        expect(err.code).toBe('MODULE_NOT_FOUND')
+      })
+    })
+  })
+
+  describe('reads a file from the filesystem', () => {
+    test('returns the contents of the file if it exists', () => {
+      const mockFullPath = path.resolve(
+        process.cwd(),
+        'some-directory',
+        'mock-file.txt'
+      )
+
+      jest.mock('fs-extra', () => ({
+        readFile: (filePath, encoding) => {
+          expect(filePath).toBe(mockFullPath)
+          expect(encoding).toBe('utf8')
+
+          return Promise.resolve('This is a text file')
+        }
+      }))
+
+      const fsHelpers = require('./../../../lib/fs')
+
+      return fsHelpers.readFile('mock-file.txt', {
+        baseDirectory: 'some-directory'
+      }).then(file => {
+        expect(file).toBe('This is a text file')
+      })
+    })
+
+    test('returns an error if the file fails to load', () => {
+      const mockFullPath = path.resolve(
+        process.cwd(),
+        'some-directory',
+        'mock-file.txt'
+      )
+
+      jest.mock('fs-extra', () => ({
+        readFile: (filePath, encoding) => {
+          expect(filePath).toBe(mockFullPath)
+          expect(encoding).toBe('utf8')
+
+          return Promise.reject(new Error('ENOENT'))
+        }
+      }))
+
+      const fsHelpers = require('./../../../lib/fs')
+
+      return fsHelpers.readFile('mock-file.txt', {
+        baseDirectory: 'some-directory'
+      }).catch(err => {
+        expect(err.message).toBe('ENOENT')
+      })
+    })
+  })
 })
