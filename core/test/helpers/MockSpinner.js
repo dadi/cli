@@ -9,8 +9,20 @@ mockSpinnerFactory.prototype.fail = function (newMessage) {
   return this
 }
 
+mockSpinnerFactory.prototype.info = function (newMessage) {
+  this.callback(newMessage || this.message, 'info')
+
+  return this
+}
+
 mockSpinnerFactory.prototype.start = function (newMessage) {
   this.callback(newMessage || this.message, 'start')
+
+  return this
+}
+
+mockSpinnerFactory.prototype.stop = function (newMessage) {
+  this.callback(newMessage || this.message, 'stop')
 
   return this
 }

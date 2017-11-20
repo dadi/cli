@@ -126,8 +126,6 @@ Setup.prototype.start = function (initialState = {}) {
         }
 
         return inquirer.prompt([question]).then(newAnswer => {
-          if (newAnswer.length === 0) return
-
           answers = answers
             ? deepMerge(answers, newAnswer)
             : newAnswer
@@ -142,7 +140,7 @@ Setup.prototype.start = function (initialState = {}) {
     shellHelpers.showText('')
 
     return answers
-  }).catch(console.log)
+  })
 }
 
 module.exports = Setup
