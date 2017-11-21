@@ -16,7 +16,7 @@ const NpmHelpers = function () {}
 
 NpmHelpers.prototype.filters = {
   hasKeyword: function (result, keyword) {
-    const pkg = result.package
+    const pkg = result && result.package
 
     if (!pkg || !pkg.keywords) return false
 
@@ -24,12 +24,16 @@ NpmHelpers.prototype.filters = {
   },
 
   isTrusted: function (result) {
-    const pkg = result.package
+    const pkg = result && result.package
 
     if (!pkg) return false
 
     return pkg.scope === 'dadi' ||
-      AUTHOR_WHITELIST.includes(pkg.publisher.username)
+      Boolean(
+        pkg.publisher &&
+        pkg.publisher.username &&
+        AUTHOR_WHITELIST.includes(pkg.publisher.username)
+      )
   }
 }
 
