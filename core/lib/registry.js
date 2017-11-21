@@ -30,9 +30,7 @@ RegistryHelpers.prototype.downloadBoilerplate = function ({
   return this.downloadFile({
     file: `boilerplates/${product}/${version}.zip`,
     progressCallback: percentage => {
-      if (!isNaN(percentage)) {
-        spinner.text = `${spinnerMessage} (${percentage}%)`
-      }
+      spinner.text = `${spinnerMessage} (${percentage}%)`
     },
     target: targetDirectory
   }).then(res => {
@@ -79,7 +77,10 @@ RegistryHelpers.prototype.downloadFile = function ({
 
     progress = newProgress
 
-    if (typeof progressCallback === 'function') {
+    if (
+      typeof progressCallback === 'function' &&
+      !isNaN(progress)
+    ) {
       progressCallback(progress)
     }
   }
