@@ -329,21 +329,18 @@ const steps = [
 ]
 
 const launchSetup = (initialState) => {
-  console.log('---> 12')
   const app = '@dadi/api'
 
   return configHelpers.getAppConfig({
     app,
     fileName: 'config.development.json'
   }).then(config => {
-    console.log('---> 13')
     const setup = new Setup(steps, config.schema)
 
     setup.setTitle('DADI API setup')
 
     return setup.start(initialState)
   }).then(answers => {
-    console.log('---> 14')
     const metaAnswers = answers._meta
 
     delete answers._meta
@@ -360,7 +357,6 @@ const launchSetup = (initialState) => {
       description: 'API configuration file',
       fileName: `config.${answers.env}.json`
     }).then(result => {
-      console.log('---> 15')
       const connector = connectorHandlers[answers.datastore]
 
       if (connector) {
@@ -377,7 +373,6 @@ const launchSetup = (initialState) => {
         })
       }
     }).then(() => {
-      console.log('---> 16')
       if (metaAnswers.client.create) {
         const createClientMessage = shellHelpers.showSpinner('Creating a new client')
 
@@ -394,7 +389,6 @@ const launchSetup = (initialState) => {
 
 module.exports = args => launchSetup()
 module.exports.run = ({baseDirectory, datastore}) => {
-  console.log('---> 11')
   process.chdir(
     path.resolve(
       process.cwd(),
