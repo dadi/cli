@@ -35,7 +35,7 @@ module.exports.start = () => {
     } else {
       return format.getGeneralHelp(entryPoints)
     }
-  } else if (args.v || (args._[0] === 'update')) {
+  } else if (args.v || args.version || (args._[0] === 'update')) {
     return pkg.version
   } else if (args._[0] && entryPoints[args._[0]]) {
     if (typeof entryPoints[args._[0]].commands[args._[1]] === 'function') {
