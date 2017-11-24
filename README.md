@@ -1,7 +1,7 @@
 <img src="https://dadi.tech/assets/products/dadi-cli.png?v=1" alt="DADI CLI logo" height="65"/>
 
 [![npm (scoped)](https://img.shields.io/npm/v/@dadi/cli.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cli)
-[![coverage](https://img.shields.io/badge/coverage-75%25-yellow.svg?style=flat?style=flat-square)](https://github.com/dadi/cli)
+[![coverage](https://img.shields.io/badge/coverage-87%25-yellow.svg?style=flat?style=flat-square)](https://github.com/dadi/cli)
 [![Build Status](https://travis-ci.org/dadi/cli.svg?branch=master)](https://travis-ci.org/dadi/cli)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](http://standardjs.com/)
 
@@ -45,6 +45,32 @@ The command `dadi help` shows a list of all the available commands for the vario
 
 ## Links
 * [CLI Documentation](http://docs.dadi.tech/cli/)
+
+## Development
+
+The repository is separated into two main directories:
+
+- `wrapper`: A thin wrapper that will download and execute CLI binaries. This is the application that gets published to NPM as `@dadi/cli`.
+- `core`: Where the main application lives. This application will be packaged using [pkg](https://github.com/zeit/pkg) to generate the CLI binaries.
+
+Most of the development work will be done on the `core` directory. To get started, run:
+
+```shell
+# Install dependencies
+cd core && npm install
+
+# Run the `dadi help` command
+node index.js help
+```
+
+By default, CLI will communicate with the live registry server at https://registry.dadi.tech. When developing, you might want to use your own local registry, in case you want to test assets that are not yet available on live.
+
+To do this, grab a copy of the [registry repository](https://github.com/dadi/registry), start a local server, and tell CLI the URL of the registry to use.
+
+```shell
+# If your registry server is available at http://localhost:7100
+REGISTRY_URL="http://localhost:7100" node index.js help
+```
 
 ## Licence
 

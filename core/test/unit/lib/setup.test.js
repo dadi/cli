@@ -1,6 +1,7 @@
 require('./../../helpers/disable-colours')
 
 const mockInquirer = require('./../../helpers/mockInquirer')
+const MockSpinner = require('./../../helpers/MockSpinner')
 const format = require('./../../../lib/format')
 const Setup = require('./../../../lib/setup')
 
@@ -118,6 +119,45 @@ describe('Setup helper', () => {
     })
   })
 
+  test('does not display questions that are defined in the initial state', () => {
+    const steps = [
+      {
+        text: 'Let\'s configure the server host',
+        questions: [
+          {
+            name: 'host',
+            message: 'What is the server host?'
+          }
+        ]
+      },
+      {
+        text: 'Time to configure the server port',
+        questions: [
+          {
+            name: 'port',
+            message: 'What is the server port?'
+          }
+        ]
+      }
+    ]
+
+    mockInquirer.setAnswer({
+      host: '127.0.0.1',
+      port: 8081
+    })
+
+    const setup = new Setup(steps, mockSchema1)
+
+    return setup.start({
+      host: 'my-host.com'
+    }).then(out => {
+      expect(mockInquirer).toHaveBeenCalledTimes(1)
+      expect(mockInquirer.mock.calls[0][0][0].name).toBe(steps[1].questions[0].name)
+      expect(mockInquirer.mock.calls[0][0][0].message).toBe(steps[1].questions[0].message)
+      expect(mockInquirer.mock.calls[0][0][0].default).toBe(mockSchema1.port.default)
+    })
+  })
+
   describe('creates question objects', () => {
     test('with `type: list` if the question contains a `choices` array', () => {
       const steps = [
@@ -148,6 +188,50 @@ describe('Setup helper', () => {
         expect(mockInquirer.mock.calls[0][0][0].message).toBe(steps[0].questions[0].message)
         expect(mockInquirer.mock.calls[0][0][0].choices).toEqual(steps[0].questions[0].choices)
         expect(mockInquirer.mock.calls[0][0][0].type).toBe('list')
+      })
+    })
+
+    test('with `type: list` if the question contains a `choices` function', () => {
+      const mockChoices = [
+        'API',
+        'Web',
+        'CDN',
+        'Other'
+      ]
+      const steps = [
+        {
+          questions: [
+            {
+              name: 'favouriteService',
+              message: 'What is your favourite DADI microservice?',
+              choices: () => {
+                return new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    resolve(mockChoices)
+                  }, 100)
+                })
+              }
+            }
+          ]
+        }
+      ]
+
+      mockInquirer.setAnswer({
+        favouriteService: 'API'
+      })
+
+      const setup = new Setup(steps, mockSchema1)
+
+      return setup.start().then(out => {
+        expect(mockInquirer.mock.calls[0][0][0].name).toBe(steps[0].questions[0].name)
+        expect(mockInquirer.mock.calls[0][0][0].message).toBe(steps[0].questions[0].message)
+        expect(mockInquirer.mock.calls[0][0][0].choices).toEqual(mockChoices)
+        expect(mockInquirer.mock.calls[0][0][0].type).toBe('list')
+
+        expect(MockSpinner.mock.calls[0][0]).toBe('Crunching some numbers')
+        expect(MockSpinner.mock.calls[0][1]).toBe('start')
+        expect(MockSpinner.mock.calls[1][0]).toBe('Crunching some numbers')
+        expect(MockSpinner.mock.calls[1][1]).toBe('stop')
       })
     })
 
@@ -257,63 +341,102 @@ describe('Setup helper', () => {
       })
     })
 
-    test('with a `default` property if the question contains one', () => {
-      const schema = {
-        microservicesCount: {
-          doc: 'Number of DADI microservices in use',
-          format: Number
+    describe('with a `default` property', () => {
+      test('if the question contains one, defined as a static value', () => {
+        const schema = {
+          microservicesCount: {
+            doc: 'Number of DADI microservices in use',
+            format: Number
+          }
         }
-      }
-      const steps = [
-        {
-          questions: [
-            {
-              name: 'microservicesCount',
-              message: 'How many DADI microservices are you using?',
-              default: 5
-            }
-          ]
-        }
-      ]
+        const steps = [
+          {
+            questions: [
+              {
+                name: 'microservicesCount',
+                message: 'How many DADI microservices are you using?',
+                default: 5
+              }
+            ]
+          }
+        ]
 
-      mockInquirer.setAnswer({
-        microservicesCount: 6
+        mockInquirer.setAnswer({
+          microservicesCount: 6
+        })
+
+        const setup = new Setup(steps, schema)
+
+        return setup.start().then(out => {
+          expect(mockInquirer.mock.calls[0][0][0].default).toBe(steps[0].questions[0].default)
+        })
       })
 
-      const setup = new Setup(steps, schema)
-
-      return setup.start().then(out => {
-        expect(mockInquirer.mock.calls[0][0][0].default).toBe(steps[0].questions[0].default)
-      })
-    })
-
-    test('with a `default` property if the field schema\'s `default` property is set', () => {
-      const schema = {
-        microservicesCount: {
-          doc: 'Number of DADI microservices in use',
-          default: 5,
-          format: Number
+      test('if the question contains one, defined as a function', () => {
+        const schema = {
+          microservicesCount: {
+            doc: 'Number of DADI microservices in use',
+            format: Number
+          }
         }
-      }
-      const steps = [
-        {
-          questions: [
-            {
-              name: 'microservicesCount',
-              message: 'How many DADI microservices are you using?'
-            }
-          ]
-        }
-      ]
+        const steps = [
+          {
+            questions: [
+              {
+                name: 'howManyCount',
+                message: 'How many DADI microservices are there?'
+              },
+              {
+                name: 'microservicesCount',
+                message: 'How many DADI microservices are you using?',
+                default: answers => {
+                  return answers.howManyCount
+                }
+              }
+            ]
+          }
+        ]
 
-      mockInquirer.setAnswer({
-        microservicesCount: 6
+        mockInquirer.setAnswer({
+          howManyCount: 100,
+          microservicesCount: 6
+        })
+
+        const setup = new Setup(steps, schema)
+
+        return setup.start().then(out => {
+          expect(mockInquirer.mock.calls[1][0][0].default).toBe(100)
+        })
       })
 
-      const setup = new Setup(steps, schema)
+      test('if the field schema\'s `default` property is set', () => {
+        const schema = {
+          microservicesCount: {
+            doc: 'Number of DADI microservices in use',
+            default: 5,
+            format: Number
+          }
+        }
+        const steps = [
+          {
+            questions: [
+              {
+                name: 'microservicesCount',
+                message: 'How many DADI microservices are you using?'
+              }
+            ]
+          }
+        ]
 
-      return setup.start().then(out => {
-        expect(mockInquirer.mock.calls[0][0][0].default).toBe(schema.microservicesCount.default)
+        mockInquirer.setAnswer({
+          microservicesCount: 6
+        })
+
+        const setup = new Setup(steps, schema)
+
+        return setup.start().then(out => {
+          expect(mockInquirer.mock.calls[0][0][0].default).toBe(schema.microservicesCount.default)
+        })
       })
     })
 
@@ -438,6 +561,166 @@ describe('Setup helper', () => {
 
         expect(mockInquirer.mock.calls[1][0][0].name).toBe(steps[0].questions[2].name)
         expect(mockInquirer.mock.calls[1][0][0].message).toBe(steps[0].questions[2].message)
+      })
+    })
+  })
+
+  describe('when `type` is `info`', () => {
+    test('displays informative text if `condition` is not defined', () => {
+      const steps = [
+        {
+          questions: [
+            {
+              name: 'name',
+              message: 'What is your name?'
+            },
+            {
+              type: 'info',
+              message: 'This is an informative text'
+            },
+            {
+              name: 'age',
+              message: 'What is your age?'
+            }
+          ]
+        }
+      ]
+
+      mockInquirer.setAnswer({
+        name: 'John Doe',
+        age: 75
+      })
+
+      const setup = new Setup(steps, {})
+
+      return setup.start().then(out => {
+        expect(mockInquirer.mock.calls[0][0][0]).toEqual(steps[0].questions[0])
+        expect(mockInquirer.mock.calls[1][0][0]).toEqual(steps[0].questions[2])
+
+        expect(MockSpinner).toHaveBeenCalledTimes(1)
+        expect(MockSpinner.mock.calls[0][0]).toBe(steps[0].questions[1].message)
+        expect(MockSpinner.mock.calls[0][1]).toBe(steps[0].questions[1].type)
+      })
+    })
+
+    test('displays informative text if `condition` is set and evaluates to `true`', () => {
+      const steps = [
+        {
+          questions: [
+            {
+              name: 'name',
+              message: 'What is your name?'
+            },
+            {
+              type: 'info',
+              message: 'This is an informative text',
+              condition: answers => {
+                expect(answers.name).toBe('John Doe')
+
+                return true
+              }
+            },
+            {
+              name: 'age',
+              message: 'What is your age?'
+            }
+          ]
+        }
+      ]
+
+      mockInquirer.setAnswer({
+        name: 'John Doe',
+        age: 75
+      })
+
+      const setup = new Setup(steps, {})
+
+      return setup.start().then(out => {
+        expect(mockInquirer.mock.calls[0][0][0]).toEqual(steps[0].questions[0])
+        expect(mockInquirer.mock.calls[1][0][0]).toEqual(steps[0].questions[2])
+
+        expect(MockSpinner).toHaveBeenCalledTimes(1)
+        expect(MockSpinner.mock.calls[0][0]).toBe(steps[0].questions[1].message)
+        expect(MockSpinner.mock.calls[0][1]).toBe(steps[0].questions[1].type)
+      })
+    })
+
+    test('does not display informative text if `condition` is set and evaluates to `false`', () => {
+      const steps = [
+        {
+          questions: [
+            {
+              name: 'name',
+              message: 'What is your name?'
+            },
+            {
+              type: 'info',
+              message: 'This is an informative text',
+              condition: answers => {
+                expect(answers.name).toBe('John Doe')
+
+                return false
+              }
+            },
+            {
+              name: 'age',
+              message: 'What is your age?'
+            }
+          ]
+        }
+      ]
+
+      mockInquirer.setAnswer({
+        name: 'John Doe',
+        age: 75
+      })
+
+      const setup = new Setup(steps, {})
+
+      return setup.start().then(out => {
+        expect(mockInquirer.mock.calls[0][0][0]).toEqual(steps[0].questions[0])
+        expect(mockInquirer.mock.calls[1][0][0]).toEqual(steps[0].questions[2])
+
+        expect(MockSpinner).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('returns an object with the answers', () => {
+    const steps = [
+      {
+        questions: [
+          {
+            name: 'bio.name',
+            message: 'What is your name?'
+          },
+          {
+            name: 'bio.age',
+            message: 'What is your age?'
+          },
+          {
+            name: 'job',
+            message: 'What is your job title?'
+          }
+        ]
+      }
+    ]
+
+    test('handles nested properties', () => {
+      const mockAnswers = {
+        bio: {
+          name: 'John Doe',
+          age: 75
+        },
+        job: 'Software Engineer'
+      }
+
+      mockInquirer.setAnswer(mockAnswers)
+
+      const setup = new Setup(steps, {})
+
+      return setup.start().then(out => {
+        expect(out).toEqual(mockAnswers)
       })
     })
   })

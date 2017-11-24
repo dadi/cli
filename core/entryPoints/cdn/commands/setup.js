@@ -1,10 +1,8 @@
 'use strict'
 
-const colors = require('colors')
 const configHelpers = require('./../../../lib/config')
-const path = require('path')
+const fsHelpers = require('./../../../lib/fs')
 const Setup = require('./../../../lib/setup')
-const shellHelpers = require('./../../../lib/shell')
 
 const steps = [
   // Server
@@ -278,7 +276,8 @@ const launchSetup = () => {
   const app = '@dadi/cdn'
 
   return configHelpers.getAppConfig({
-    app
+    app,
+    fileName: 'config.development.json'
   }).then(config => {
     const setup = new Setup(steps, config.schema)
 
@@ -286,41 +285,18 @@ const launchSetup = () => {
 
     return setup.start()
   }).then(answers => {
-    const configSpinner = shellHelpers.showSpinner('Writing configuration file')
-
     return configHelpers.saveAppConfig({
       app,
       config: answers,
-      environment: answers.env
-    }).then(result => {
-      let message = `Configuration file written to ${colors.underline(result.path)}.`
-
-      if (result.backupPath) {
-        configSpinner.warn(
-          message +
-          ` A file already existed at that location, so it was backed up to ${colors.underline(result.backupPath)}.`
-        )
-
-        return
-      }
-
-      configSpinner.succeed(message)
-    }).catch(err => {
-      configSpinner.fail('An unexpected error occurred when writing the configuration to the file.')
-
-      return Promise.reject(err)
+      description: 'API configuration file',
+      fileName: `config.${answers.env}.json`
     })
   })
 }
 
 module.exports = args => launchSetup()
 module.exports.run = baseDirectory => {
-  process.chdir(
-    path.resolve(
-      process.cwd(),
-      baseDirectory
-    )
-  )
+  fsHelpers.cd(baseDirectory)
 
   return launchSetup()
 }

@@ -1,15 +1,25 @@
 const mockExec = require('./../../helpers/MockExec')
 const mockSpinner = require('./../../helpers/MockSpinner')
 const mockCommandOutput = require('./../../helpers/MockExec').map
+const pmock = require('pmock')
 const shell = require('./../../../lib/shell')
+
+// (!) We're mocking `console.log()` in this test, so if you need
+// to debug something within the test itself, you must use `debug()`
+const debug = console.log
+console.log = jest.fn()
+
+afterEach(() => {
+  console.log.mockClear()
+})
 
 describe('Shell utility', () => {
   describe('`run()`', () => {
     test('runs a shell command provided as a string', () => {
       const command = 'ls'
-      const lsMock = jest.fn()
 
       return shell.run(command).then(stdout => {
+        expect(console.log).not.toHaveBeenCalled()
         expect(mockExec).toHaveBeenCalledTimes(1)
         expect(mockExec.mock.calls[0][0]).toEqual(command)
         expect(stdout).toEqual(mockCommandOutput[command])
@@ -21,9 +31,22 @@ describe('Shell utility', () => {
       const lsMock = jest.fn()
 
       return shell.run(command).then(stdout => {
+        expect(console.log).not.toHaveBeenCalled()
         expect(mockExec).toHaveBeenCalledTimes(1)
         expect(mockExec.mock.calls[0][0]).toEqual(command.command)
         expect(stdout).toEqual(mockCommandOutput[command.command])        
+      })
+    })
+
+    test('runs a shell command and logs the output in the console if debug mode is on', () => {
+      const command = 'ls'
+
+      global.debugMode = true
+
+      return shell.run(command).then(stdout => {
+        expect(console.log).toHaveBeenCalledTimes(2)
+        expect(console.log.mock.calls[0][0]).toBe(null)
+        expect(console.log.mock.calls[1][0]).toBe(mockExec.map.ls)
       })
     })
 
@@ -137,5 +160,17 @@ describe('Shell utility', () => {
       expect(mockSpinner.mock.calls[0][1]).toEqual('start')
       expect(spinner.constructor).toBe(mockSpinner.factory)
     })
+  })
+
+  test('kills the process', done => {
+    const processExit = process.exit
+
+    process.exit = () => {
+      process.exit = processExit
+
+      done()
+    }
+
+    shell.killProcess()
   })
 })

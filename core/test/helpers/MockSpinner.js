@@ -9,14 +9,32 @@ mockSpinnerFactory.prototype.fail = function (newMessage) {
   return this
 }
 
+mockSpinnerFactory.prototype.info = function (newMessage) {
+  this.callback(newMessage || this.message, 'info')
+
+  return this
+}
+
 mockSpinnerFactory.prototype.start = function (newMessage) {
   this.callback(newMessage || this.message, 'start')
 
   return this
 }
 
+mockSpinnerFactory.prototype.stop = function (newMessage) {
+  this.callback(newMessage || this.message, 'stop')
+
+  return this
+}
+
 mockSpinnerFactory.prototype.succeed = function (newMessage) {
   this.callback(newMessage || this.message, 'succeed')
+
+  return this
+}
+
+mockSpinnerFactory.prototype.warn = function (newMessage) {
+  this.callback(newMessage || this.message, 'warn')
 
   return this
 }

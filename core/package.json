@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/dadi/cli",
   "scripts": {
-    "test": "standard && jest && node test/utils/coverage.js",
+    "test": "standard --fix && jest && node test/utils/coverage.js",
     "test-dev": "jest --watch",
     "build": "pkg index.js -c package.json -o bin/dadi"
   },
@@ -58,6 +58,7 @@
     ],
     "coverageReporters": [
       "cobertura",
+      "html",
       "text"
     ],
     "testMatch": [
@@ -66,7 +67,8 @@
     "moduleNameMapper": {
       "/Users/fakeuser/fakedir/node_modules/@dadi/api": "<rootDir>/test/helpers/MockDadiApi.js",
       "(.*)/@dadi/mock-app$": "<rootDir>/test/helpers/MockDadiApi.js",
-      "(.*)/@dadi/mock-app/package.json$": "<rootDir>/test/helpers/mockPackage.json"
+      "(.*)/@dadi/mock-app/package.json$": "<rootDir>/test/helpers/mockPackage.json",
+      "(.*)/node_modules/@dadi/some-app/some-file.json$": "<rootDir>/test/helpers/mockPackage.json"
     }
   },
   "standard": {

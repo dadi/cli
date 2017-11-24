@@ -1,10 +1,21 @@
 'use strict'
 
+const colors = require('colors')
 const fs = require('fs-extra')
 const inquirer = require('inquirer')
 const path = require('path')
+const shell = require('./shell')
 
 const FsHelpers = function () {}
+
+FsHelpers.prototype.cd = function (directory) {
+  process.chdir(
+    path.resolve(
+      process.cwd(),
+      directory
+    )
+  )
+}
 
 FsHelpers.prototype.fileExists = function (file) {
   return fs.stat(path.resolve(process.cwd(), file))
@@ -13,7 +24,8 @@ FsHelpers.prototype.fileExists = function (file) {
 }
 
 FsHelpers.prototype.loadApp = function (name, {
-  baseDirectory = '.'
+  baseDirectory = '.',
+  displayError = true
 } = {}) {
   return new Promise((resolve, reject) => {
     try {
@@ -41,6 +53,13 @@ FsHelpers.prototype.loadApp = function (name, {
         pkg
       })
     } catch (err) {
+      if (displayError) {
+        shell.showSpinner(
+          `This directory does not seem to contain an installation of ${colors.bold(name)}. Are you running the command from the right location?`,
+          'fail'
+        )
+      }
+
       return reject(new Error('ERR_LOADING_APP'))
     }
   })
@@ -114,7 +133,7 @@ FsHelpers.prototype.warnIfDirectoryIsNotEmpty = function ({
     })
     .catch(err => {
       if (err.code === 'ENOENT') {
-        return null
+        return false
       }
 
       return Promise.reject(err)
