@@ -1,9 +1,11 @@
 'use strict'
 
 const clientsAdd = require('./../clients-add')
+const fsHelpers = require('./../../../../lib/fs')
 const configHelpers = require('./../../../../lib/config')
 const npm = require('./../../../../lib/npm')
 const path = require('path')
+const semverRangeCompare = require('semver-compare-range')
 const Setup = require('./../../../../lib/setup')
 const shellHelpers = require('./../../../../lib/shell')
 
@@ -328,12 +330,26 @@ const steps = [
   }
 ]
 
-const launchSetup = (initialState) => {
+const launchSetup = (initialState = {}) => {
   const app = '@dadi/api'
 
-  return configHelpers.getAppConfig({
-    app,
-    fileName: 'config.development.json'
+  return fsHelpers.loadApp(app).then(({module, pkg}) => {
+    const isSupportedVersion = semverRangeCompare(pkg.version, '3.0.0') >= 0
+
+    if (!isSupportedVersion) {
+      shellHelpers.showSpinner(
+        `This command requires version 3.0 or greater of DADI API (${pkg.version} found)`,
+        'fail'
+      )
+
+      return Promise.reject(new Error('UNSUPPORTED_VERSION'))
+    }
+
+    return configHelpers.getAppConfig({
+      app,
+      baseDirectory: '../../api-test',
+      fileName: 'config.development.json'
+    })
   }).then(config => {
     const setup = new Setup(steps, config.schema)
 

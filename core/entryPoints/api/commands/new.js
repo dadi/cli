@@ -126,7 +126,16 @@ module.exports = args => {
           return setup.run({
             baseDirectory: directory,
             datastore
-          }).then(() => output)
+          }).then(() => output).catch(err => {
+            // If the setup command fails because the version being installed
+            // is not supported, that's fine. We just swallow the error and
+            // move on with our lives.
+            if (err.message === 'UNSUPPORTED_VERSION') {
+              return output
+            }
+
+            return Promise.reject(err)
+          })
         })
       })
     })

@@ -11,4 +11,6 @@ Promise.resolve(cli.start())
   })
   .catch(err => {
     if (err && global.debugMode) echo(err)
+
+    process.exit(1)
   })

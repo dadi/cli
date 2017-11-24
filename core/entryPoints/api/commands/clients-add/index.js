@@ -40,7 +40,7 @@ const createClient = ({clientId, message, secret, type}) => {
     switch (err && err.message) {
       case 'ERR_LOADING_APP':
         if (message) {
-          message.fail('The current directory does not seem to contain a working DADI API installation')
+          message.fail()
         }
 
         break
