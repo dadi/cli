@@ -330,17 +330,24 @@ const steps = [
   }
 ]
 
-const launchSetup = (initialState = {}) => {
+const launchSetup = ({
+  initialState = {},
+  showErrorMessages = true
+} = {}) => {
   const app = '@dadi/api'
 
-  return fsHelpers.loadApp(app).then(({module, pkg}) => {
+  return fsHelpers.loadAppFile(app, {
+    filePath: 'package.json'
+  }).then(pkg => {
     const isSupportedVersion = semverRangeCompare(pkg.version, '3.0.0') >= 0
 
     if (!isSupportedVersion) {
-      shellHelpers.showSpinner(
-        `This command requires version 3.0 or greater of DADI API (${pkg.version} found)`,
-        'fail'
-      )
+      if (showErrorMessages) {
+        shellHelpers.showSpinner(
+          `This command requires version 3.0 or greater of DADI API (${pkg.version} found)`,
+          'fail'
+        )
+      }
 
       return Promise.reject(new Error('UNSUPPORTED_VERSION'))
     }
@@ -416,7 +423,10 @@ module.exports.run = ({baseDirectory, datastore}) => {
     ? {datastore}
     : {}
 
-  return launchSetup(setupInitialState)
+  return launchSetup({
+    initialState: setupInitialState,
+    showErrorMessages: false
+  })
 }
 module.exports.description = 'Launches an interactive setup wizard'
 module.exports.parameters = {}

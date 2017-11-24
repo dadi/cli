@@ -16,7 +16,6 @@ const createClient = ({clientId, message, secret, type}) => {
     }),
     resolveLevel: () => {}
   })
-
   console.log = function () {}
 
   return fsHelpers.loadApp('@dadi/api').then(app => {

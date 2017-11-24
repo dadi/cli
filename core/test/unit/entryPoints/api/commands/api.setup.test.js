@@ -53,16 +53,9 @@ describe('API `setup` command', () => {
 
   describe('API < v3', () => {
     beforeAll(() => {
-      fsHelpers.loadApp = app => {
+      fsHelpers.loadAppFile = app => {
         return Promise.resolve({
-          module: {
-            Config: {
-              get: parameter => parameter
-            }
-          },
-          pkg: {
-            version: '2.0.0'
-          }
+          version: '2.2.1'
         })
       }
     })
@@ -92,16 +85,9 @@ describe('API `setup` command', () => {
         })
       })
 
-      fsHelpers.loadApp = app => {
+      fsHelpers.loadAppFile = app => {
         return Promise.resolve({
-          module: {
-            Config: {
-              get: parameter => parameter
-            }
-          },
-          pkg: {
-            version: '3.0.0'
-          }
+          version: '3.0.0'
         })
       }
     })
