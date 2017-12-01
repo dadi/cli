@@ -6,8 +6,15 @@ const inquirer = require('inquirer')
 const mockRequire = require('mock-require')
 const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../../lib/shell')
+const utilHelpers = require('./../../../../lib/util')
 
-const createClient = ({clientId, message, secret, type}) => {
+const createClient = ({
+  clientId,
+  generated,
+  message,
+  secret,
+  type
+}) => {
   // Mocking these modules so that API doesn't polute stdout.
   mockRequire('console-stamp', () => {})
   mockRequire('bunyan', {
@@ -33,7 +40,13 @@ const createClient = ({clientId, message, secret, type}) => {
     })
   }).then(docs => {
     if (message) {
-      message.succeed(`Created client with ID ${colors.bold(clientId)} and type ${colors.bold(type)}`)
+      let messageString = `Created client with ID ${colors.bold(clientId)} and type ${colors.bold(type)}.`
+
+      if (generated) {
+        messageString += ` The secret we generated for you is ${colors.bold(secret)} – store it somewhere safe!`
+      }
+
+      message.succeed(messageString)
     }
   }).catch(err => {
     switch (err && err.message) {
@@ -64,12 +77,12 @@ const renderQuestions = () => {
     {
       type: 'input',
       name: 'id',
-      message: 'What is the client ID?'
+      message: 'Enter the client ID'
     },
     {
       type: 'input',
       name: 'secret',
-      message: 'What is the secret?'
+      message: 'Enter a strong secret (press Enter if you want us to generate one for you)'
     },
     {
       type: 'list',
@@ -90,12 +103,19 @@ const renderQuestions = () => {
 
   return inquirer
     .prompt(questions)
+    .then(answers => {
+      if (answers.secret.length === 0) {
+        answers.secret = utilHelpers.generatePassword()
+        answers._generated = true
+      }
+
+      return answers
+    })
 }
 
 module.exports = args => {
-  const message = shell.showSpinner('Creating a new client')
-
   if (args.id || args.secret) {
+    const message = shell.showSpinner('Creating a new client')
     const invalidArgs = ['id', 'secret'].filter(arg => {
       return (
         typeof args[arg] !== 'string' ||
@@ -117,8 +137,11 @@ module.exports = args => {
     })
   } else {
     return renderQuestions().then(answers => {
+      const message = shell.showSpinner('Creating a new client')
+
       return createClient({
         clientId: answers.id,
+        generated: answers._generated,
         message,
         secret: answers.secret,
         type: answers.type

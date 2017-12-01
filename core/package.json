@@ -11,6 +11,7 @@
   "author": "eb@dadi.co",
   "license": "ISC",
   "dependencies": {
+    "anyid": "1.0.1",
     "cli-format": "^3.0.9",
     "cli-table": "^0.3.1",
     "colors": "^1.1.2",
