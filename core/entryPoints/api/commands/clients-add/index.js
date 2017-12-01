@@ -23,7 +23,7 @@ const createClient = ({
     }),
     resolveLevel: () => {}
   })
-  //console.log = function () {}
+  console.log = function () {}
 
   return fsHelpers.loadApp('@dadi/api').then(app => {
     // Deciding which syntax to use based on the version of API.
