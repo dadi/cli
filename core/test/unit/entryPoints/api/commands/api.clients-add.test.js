@@ -396,6 +396,11 @@ describe('API `clients:add` command', () => {
             type: mockAnswers.type
           })
 
+          expect(mockSpinner.mock.calls[1][0]).toBe(
+            `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}.`
+          )
+          expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
+
           expect(mockShellKillProcess).toHaveBeenCalled()
         })
       })
@@ -417,6 +422,11 @@ describe('API `clients:add` command', () => {
             secret: mockRandomSecret,
             type: mockAnswers.type
           })
+
+          expect(mockSpinner.mock.calls[1][0]).toBe(
+            `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}. The secret we generated for you is ${mockRandomSecret} – store it somewhere safe!`
+          )
+          expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
         })
       })
 
