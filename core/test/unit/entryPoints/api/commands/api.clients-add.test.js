@@ -10,6 +10,13 @@ const pmock = require('pmock')
 const registry = require('./../../../../../lib/registry')
 const setMockInquirerAnswer = require('./../../../../helpers/mockInquirer').setAnswer
 const shell = require('./../../../../../lib/shell')
+const util = require('./../../../../../lib/util')
+
+const mockRandomSecret = '1q2w3e4r5t6y7u8i9o'
+
+jest.mock('./../../../../../lib/util', () => ({
+  generatePassword: () => mockRandomSecret
+}))
 
 let apiClientsAdd = require('./../../../../../entryPoints/api/commands/clients-add')
 
@@ -121,6 +128,26 @@ describe('API `clients:add` command', () => {
           })
 
           expect(mockDatabase.close).toHaveBeenCalled()
+        })
+      })
+
+      test('generates a random secret if the user leaves the answer empty', () => {
+        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const mockAnswers = {
+          id: 'testClient',
+          secret: '',
+          type: 'admin'
+        }
+
+        setMockInquirerAnswer(mockAnswers)
+
+        return apiClientsAdd(args).then(stdout => {
+          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
+          expect(mockDatabase.insert.mock.calls[0][0]).toEqual({
+            clientId: mockAnswers.id,
+            secret: mockRandomSecret,
+            type: mockAnswers.type
+          })
         })
       })
 
@@ -369,7 +396,37 @@ describe('API `clients:add` command', () => {
             type: mockAnswers.type
           })
 
+          expect(mockSpinner.mock.calls[1][0]).toBe(
+            `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}.`
+          )
+          expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
+
           expect(mockShellKillProcess).toHaveBeenCalled()
+        })
+      })
+
+      test('generates a random secret if the user leaves the answer empty', () => {
+        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const mockAnswers = {
+          id: 'testClient',
+          secret: '',
+          type: 'admin'
+        }
+
+        setMockInquirerAnswer(mockAnswers)
+
+        return apiClientsAdd(args).then(stdout => {
+          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockAnswers.id)
+          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual({
+            clientId: mockAnswers.id,
+            secret: mockRandomSecret,
+            type: mockAnswers.type
+          })
+
+          expect(mockSpinner.mock.calls[1][0]).toBe(
+            `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}. The secret we generated for you is ${mockRandomSecret} – store it somewhere safe!`
+          )
+          expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
         })
       })
 
