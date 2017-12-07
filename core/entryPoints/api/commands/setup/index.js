@@ -11,6 +11,7 @@ const shellHelpers = require('./../../../../lib/shell')
 
 // Connectors
 const connectorHandlers = {
+  '@dadi/api-filestore': require('./filestore'),
   '@dadi/api-mongodb': require('./mongodb'),
   '@dadi/api-rethinkdb': require('./rethinkdb')
 }
@@ -72,28 +73,15 @@ const steps = [
         name: 'publicUrl.host',
         message: 'What is the port?',
         default: 80
-      },
-      {
-        type: 'list',
-        name: 'publicUrl.protocol',
-        message: 'What protocol?',
-        choices: [
-          {
-            name: 'HTTPS (secure, recommended)',
-            value: 'https'
-          },
-          {
-            name: 'HTTP (insecure)',
-            value: 'http'
-          }
-        ],
-        default: 'https'
       }
     ]
   },
 
   // Databases
   {
+    condition: answers => {
+      return Boolean(connectorHandlers[answers.datastore])
+    },
     text: 'Looking great! Time to configure your databases.',
     questions: [
       {
@@ -121,24 +109,48 @@ const steps = [
         }
       },
       {
+        condition: answers => {
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.questions.name
+        },
         name: '_meta.datastore.database',
         message: 'What is the name of the database?',
         default: 'dadiapi'
       },
       {
+        condition: answers => {
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.questions.username
+        },
         name: '_meta.datastore.username',
         message: 'What is the database username?'
       },
       {
+        condition: answers => {
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.questions.password
+        },
         name: '_meta.datastore.password',
         message: 'What is the database password?'
       },
       {
         condition: answers => {
-          return [
-            '@dadi/api-mongodb',
-            '@dadi/api-rethinkdb'
-          ].includes(answers.datastore)
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.questions.path
+        },
+        name: '_meta.datastore.dbPath',
+        message: 'Where do you want to save your database files?',
+        default: 'workspace/db'
+      },
+      {
+        condition: answers => {
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.questions.host
         },
         name: '_meta.datastore.host',
         message: 'What is the database server host?',
@@ -146,18 +158,16 @@ const steps = [
       },
       {
         condition: answers => {
-          return [
-            '@dadi/api-mongodb',
-            '@dadi/api-rethinkdb'
-          ].includes(answers.datastore)
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.questions.port
         },
         name: '_meta.datastore.port',
         message: 'And what is the database server port?',
         default: answers => {
-          switch (answers.datastore) {
-            case '@dadi/api-mongodb': return 27017
-            case '@dadi/api-rethinkdb': return 28015
-          }
+          const handler = connectorHandlers[answers.datastore]
+
+          return handler && handler.settings.defaultPort
         }
       }
     ]
@@ -165,6 +175,9 @@ const steps = [
 
   // Client
   {
+    condition: answers => {
+      return Boolean(connectorHandlers[answers.datastore])
+    },
     text: 'You\'ll need an oAuth2 client to interact with API. It consists of an ID + secret pair, which you\'ll send to API in exchange for a bearer token. This token is then sent alongside each request in order to authenticate you with the system.',
     questions: [
       {
@@ -180,7 +193,7 @@ const steps = [
       {
         condition: answers => answers._meta.client.create === true,
         name: '_meta.client.secret',
-        message: 'And what is the secret?'
+        message: 'And what is the secret? Press <Enter> if you want us to generate one for you.'
       },
       {
         condition: answers => answers._meta.client.create === true,
@@ -354,7 +367,6 @@ const launchSetup = ({
 
     return configHelpers.getAppConfig({
       app,
-      baseDirectory: '../../api-test',
       fileName: 'config.development.json'
     })
   }).then(config => {
@@ -364,14 +376,18 @@ const launchSetup = ({
 
     return setup.start(initialState)
   }).then(answers => {
+    const connector = connectorHandlers[answers.datastore]
     const metaAnswers = answers._meta
 
     delete answers._meta
 
     // Add auth block
     answers.auth = {
-      datastore: answers.datastore,
-      database: metaAnswers.datastore.database
+      datastore: answers.datastore
+    }
+
+    if (connector) {
+      answers.auth.database = metaAnswers.datastore.database
     }
 
     return configHelpers.saveAppConfig({
@@ -380,8 +396,6 @@ const launchSetup = ({
       description: 'API configuration file',
       fileName: `config.${answers.env}.json`
     }).then(result => {
-      const connector = connectorHandlers[answers.datastore]
-
       if (connector) {
         const dbConfig = connector.buildConfig(
           metaAnswers.datastore,
@@ -396,7 +410,12 @@ const launchSetup = ({
         })
       }
     }).then(() => {
-      if (metaAnswers.client.create) {
+      const handler = connectorHandlers[answers.datastore]
+
+      if (
+        handler &&
+        metaAnswers.client.create
+      ) {
         const createClientMessage = shellHelpers.showSpinner('Creating a new client')
 
         return clientsAdd.createClient({
@@ -425,7 +444,7 @@ module.exports.run = ({baseDirectory, datastore}) => {
 
   return launchSetup({
     initialState: setupInitialState,
-    showErrorMessages: false
+    showErrorMessages: true
   })
 }
 module.exports.description = 'Launches an interactive setup wizard'
