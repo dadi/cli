@@ -1,56 +1,55 @@
-module.exports = ({
-  apiConfig,
-  apiConnection,
+const apiConfig = require('@dadi/api').Config
+const apiConnection = require('@dadi/api').Connection
+const clientId = process.argv[1]
+const secret = process.argv[2]
+const type = process.argv[3]
+
+const options = apiConfig.get('auth.database')
+options.auth = true
+
+const connection = apiConnection(options)
+const clientCollectionName = apiConfig.get('auth.clientCollection')
+const payload = {
   clientId,
   secret,
   type
-}) => {
-  const options = apiConfig.get('auth.database')
-  options.auth = true
+}
 
-  const connection = apiConnection(options)
-  const clientCollectionName = apiConfig.get('auth.clientCollection')
-  const payload = {
-    clientId,
-    secret,
-    type
-  }
+let connected = false
 
-  return new Promise((resolve, reject) => {
-    let connected = false
+connection.on('connect', db => {
+  if (connected) return
 
-    connection.on('connect', db => {
-      if (connected) return
+  connected = true
 
-      connected = true
+  const existingClients = db.collection(clientCollectionName).find({
+    clientId: clientId
+  })
 
-      const existingClients = db.collection(clientCollectionName).find({
-        clientId: clientId
-      })
+  existingClients.toArray((err, documents) => {
+    if (err) {
+      db.close()
 
-      existingClients.toArray((err, documents) => {
-        if (err) {
-          db.close()
+      process.exit(1)
+    }
 
-          return reject(err)
-        }
+    if (documents.length > 0) {
+      db.close()
 
-        if (documents.length > 0) {
-          db.close()
+      console.error('ID_EXISTS')
 
-          return reject(new Error('ID_EXISTS'))
-        }
+      process.exit(1)
+    }
 
-        db.collection(clientCollectionName).insert(payload, (err, docs) => {
-          db.close()
+    db.collection(clientCollectionName).insert(payload, (err, docs) => {
+      db.close()
 
-          if (err) {
-            return reject(err)
-          }
+      if (err) {
+        process.exit(1)
+      }
 
-          return resolve(docs)
-        })
-      })
+      console.log(docs)
+      process.exit(0)
     })
   })
-}
+})

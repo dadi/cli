@@ -1,4 +1,8 @@
-const shell = require('./../../../../lib/shell')
+const apiConfig = require('@dadi/api').Config
+const apiConnection = require('@dadi/api').Connection
+const clientId = process.argv[1]
+const secret = process.argv[2]
+const type = process.argv[3]
 
 const getClientStoreSchema = () => {
   return {
@@ -26,59 +30,47 @@ const getClientStoreSchema = () => {
   }
 }
 
-module.exports = ({
-  apiConfig,
-  apiConnection,
+const clientCollectionName = apiConfig.get('auth.clientCollection')
+const dbOptions = {
+  auth: true,
+  database: apiConfig.get('auth.database'),
+  collection: clientCollectionName
+}
+const connection = apiConnection(dbOptions, apiConfig.get('auth.datastore'))
+const payload = {
   clientId,
   secret,
   type
-}) => {
-  const clientCollectionName = apiConfig.get('auth.clientCollection')
-  const dbOptions = {
-    auth: true,
-    database: apiConfig.get('auth.database'),
-    collection: clientCollectionName
-  }
-  const connection = apiConnection(dbOptions, apiConfig.get('auth.datastore'))
-  const payload = {
-    clientId,
-    secret,
-    type
-  }
-
-  return new Promise((resolve, reject) => {
-    let connected = false
-
-    connection.on('connect', db => {
-      if (connected) return
-
-      connected = true
-
-      const query = {
-        clientId: clientId
-      }
-
-      db.find({ query, collection: clientCollectionName, options: {}, schema: getClientStoreSchema() }).then(existingClients => {
-        if (existingClients.results.length > 0) {
-          shell.killProcess()
-
-          return reject(new Error('ID_EXISTS'))
-        }
-
-        db.insert({ data: payload, collection: clientCollectionName, schema: getClientStoreSchema() }).then(result => {
-          shell.killProcess()
-
-          return resolve(result)
-        }).catch((err) => {
-          shell.killProcess()
-
-          return reject(err)
-        })
-      }).catch((err) => {
-        shell.killProcess()
-
-        return reject(err)
-      })
-    })
-  })
 }
+
+let connected = false
+
+connection.on('connect', db => {
+  if (connected) return
+
+  connected = true
+
+  const query = {
+    clientId: clientId
+  }
+
+  db.find({ query, collection: clientCollectionName, options: {}, schema: getClientStoreSchema() }).then(existingClients => {
+    if (existingClients.results.length > 0) {
+      console.error('ID_EXISTS')
+
+      process.exit(1)
+    }
+
+    db.insert({ data: payload, collection: clientCollectionName, schema: getClientStoreSchema() }).then(result => {
+      process.exit(0)
+    }).catch(err => {
+      console.error(err)
+
+      process.exit(1)
+    })
+  }).catch(err => {
+    console.error(err)
+
+    process.exit(1)
+  })
+})

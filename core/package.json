@@ -20,7 +20,6 @@
     "fs-extra": "^4.0.2",
     "inquirer": "^3.2.0",
     "latest-version": "^3.1.0",
-    "mock-require": "^2.0.2",
     "mri": "^1.1.0",
     "node-fetch": "^1.7.3",
     "object-path": "^0.11.4",

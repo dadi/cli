@@ -1,6 +1,7 @@
 require('./../../../../helpers/disable-colours')
 
 const argsHelper = require('./../../../../helpers/args')
+const fs = require('fs')
 const mockDadiApi = require('./../../../../helpers/MockDadiApi')
 const mockExec = require('./../../../../helpers/MockExec')
 const mockInquirer = require('./../../../../helpers/mockInquirer')
@@ -11,6 +12,15 @@ const registry = require('./../../../../../lib/registry')
 const setMockInquirerAnswer = require('./../../../../helpers/mockInquirer').setAnswer
 const shell = require('./../../../../../lib/shell')
 const util = require('./../../../../../lib/util')
+
+const createRecordsFnV1V2 = fs.readFileSync(
+  path.resolve(__dirname + './../../../../../entryPoints/api/commands/clients-add/create-records-api-v1-v2.js'),
+  'utf8'
+)
+const createRecordsFnV3 = fs.readFileSync(
+  path.resolve(__dirname + './../../../../../entryPoints/api/commands/clients-add/create-records-api-v3.js'),
+  'utf8'
+)
 
 const mockRandomSecret = '1q2w3e4r5t6y7u8i9o'
 
@@ -33,73 +43,21 @@ describe('API `clients:add` command', () => {
       'auth.database': 'database'
     }
 
-    let mockApi
     let mockClients
     let mockDatabase
 
     beforeAll(() => {
-      mockApi = {
-        module: {
-          Config: {
-            get: parameter => mockConfigParameters[parameter]
-          },
-          Connection: jest.fn((options, datastore) => {
-            return {
-              on: (event, callback) => {
-                if (event === 'connect') {
-                  callback(mockDatabase)
-                }
-              }
-            }
-          })
-        },
-        pkg: {
-          version: '2.0.0'
-        }
-      }
-
       jest.mock('./../../../../../lib/fs', () => ({
-        loadApp: app => {
-          return Promise.resolve(mockApi)
+        loadAppFile: app => {
+          return Promise.resolve({
+            version: '2.0.0'
+          })
         }
       }))
 
       jest.resetModules()
 
       apiClientsAdd = require('./../../../../../entryPoints/api/commands/clients-add')
-    })
-
-    beforeEach(() => {
-      mockDatabase = {
-        close: jest.fn(),
-
-        find: jest.fn(() => {
-          return {
-            toArray: callback => {
-              callback(null, mockClients)
-            }
-          }
-        }),
-
-        insert: jest.fn((payload, callback) => {
-          callback(null, {})
-        })
-      }
-
-      mockDatabase.collection = jest.fn(collection => ({
-        find: mockDatabase.find,
-        insert: mockDatabase.insert
-      }))
-
-      mockClients = []
-    })
-
-    afterEach(() => {
-      mockDatabase.close.mockClear()
-      mockDatabase.collection.mockClear()
-      mockDatabase.find.mockClear()
-      mockDatabase.insert.mockClear()
-      mockApi.module.Connection.mockClear()
     })
 
     describe('triggers interactive mode if data isn\'t supplied as parameters', () => {
@@ -117,17 +75,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
-          expect(mockDatabase.collection).toHaveBeenCalledTimes(2)
-          expect(mockDatabase.collection.mock.calls[0][0]).toBe(mockConfigParameters['auth.clientCollection'])
-
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual({
-            clientId: mockAnswers.id,
-            secret: mockAnswers.secret,
-            type: mockAnswers.type
-          })
-
-          expect(mockDatabase.close).toHaveBeenCalled()
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV1V2}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.type}`
+          )
         })
       })
 
@@ -142,12 +92,9 @@ describe('API `clients:add` command', () => {
         setMockInquirerAnswer(mockAnswers)
 
         return apiClientsAdd(args).then(stdout => {
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual({
-            clientId: mockAnswers.id,
-            secret: mockRandomSecret,
-            type: mockAnswers.type
-          })
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV1V2}" ${mockAnswers.id} ${mockRandomSecret} ${mockAnswers.type}`
+          )
         })
       })
 
@@ -160,26 +107,17 @@ describe('API `clients:add` command', () => {
         }
 
         setMockInquirerAnswer(mockAnswers)
-
-        mockClients = [
-          {
-            clientId: mockAnswers.id
-          }
-        ]
+        mockExec.setNextResponse(new Error('ID_EXISTS'))
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockAnswers.id} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert).not.toHaveBeenCalled()
-
-          expect(mockDatabase.close).toHaveBeenCalled()
         })
       })
 
-      test('displays an error message if the find operation has failed', () => {
+      test('displays an error message if the operation has failed', () => {
         const args = argsHelper.getArgsForCommand('dadi api clients:add')
         const mockAnswers = {
           id: 'existingClient',
@@ -188,53 +126,13 @@ describe('API `clients:add` command', () => {
         }
 
         setMockInquirerAnswer(mockAnswers)
-
-        mockClients = [
-          {
-            clientId: mockAnswers.id
-          }
-        ]
-
-        mockDatabase.find = jest.fn(() => {
-          return {
-            toArray: callback => {
-              callback(true)
-            }
-          }
-        })
+        mockExec.setNextResponse(new Error())
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe('Could not create client')
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
-          expect(mockDatabase.close).toHaveBeenCalled()
-        })
-      })
-
-      test('displays an error message if the insert operation has failed', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
-        const mockAnswers = {
-          id: 'existingClient',
-          secret: 'superSecret',
-          type: 'admin'
-        }
-
-        setMockInquirerAnswer(mockAnswers)
-
-        mockClients = []
-
-        mockDatabase.insert = jest.fn((payload, callback) => {
-          callback(true)
-        })
-
-        return apiClientsAdd(args).then(stdout => {
-          expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
-          expect(mockSpinner.mock.calls[0][1]).toBe('start')
-          expect(mockSpinner.mock.calls[1][0]).toBe('Could not create client')
-          expect(mockSpinner.mock.calls[1][1]).toBe('fail')
-
-          expect(mockDatabase.close).toHaveBeenCalled()
         })
       })
     })
@@ -253,16 +151,16 @@ describe('API `clients:add` command', () => {
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual(mockArgs)
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV1V2}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.type}`
+          )
         })
       })
 
       test('uses `user` as the default value for `type` if not supplied', () => {
         const mockArgs = {
           clientId: 'someClient',
-          secret: 'mySecret',
-          type: 'user'
+          secret: 'mySecret'
         }
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret}`
@@ -271,8 +169,9 @@ describe('API `clients:add` command', () => {
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert.mock.calls[0][0]).toEqual(mockArgs)
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV1V2}" ${mockArgs.clientId} ${mockArgs.secret} user`
+          )
         })
       })
 
@@ -286,93 +185,37 @@ describe('API `clients:add` command', () => {
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
         )
 
-        mockClients = [
-          {
-            clientId: mockArgs.clientId
-          }
-        ]
+        mockExec.setNextResponse(new Error('ID_EXISTS'))
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockArgs.clientId} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
-
-          expect(mockDatabase.find.mock.calls[0][0].clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert).not.toHaveBeenCalled()
         })
       })
     })
   })
 
   describe('API > v3', () => {
-    const mockConfigParameters = {
-      'auth.clientCollection': 'collection',
-      'auth.database': 'database',
-      'auth.datastore': 'datastore'
-    }
-
-    let mockApi
-    let mockClients
-    let mockDatabase
-    let mockShellKillProcess = jest.fn()
-
     const mockShowSpinner = shell.showSpinner
 
     jest.mock('./../../../../../lib/shell', () => ({
-      killProcess: mockShellKillProcess,
       showSpinner: mockShowSpinner
     }))
 
     beforeAll(() => {
-      mockDatabase = {
-        find: jest.fn(() => Promise.resolve({
-          results: mockClients
-        })),
-
-        insert: jest.fn(() => Promise.resolve({}))
-      }
-
-      mockApi = {
-        module: {
-          Config: {
-            get: parameter => mockConfigParameters[parameter]
-          },
-          Connection: jest.fn((options, datastore) => {
-            return {
-              on: (event, callback) => {
-                if (event === 'connect') {
-                  callback(mockDatabase)
-                }
-              }
-            }
-          })
-        },
-        pkg: {
-          version: '3.0.0'
-        }
-      }
-
       jest.mock('./../../../../../lib/fs', () => ({
-        loadApp: app => {
-          return Promise.resolve(mockApi)
+        loadAppFile: app => {
+          return Promise.resolve({
+            version: '3.0.0'
+          })
         }
       }))
 
       jest.resetModules()
 
       apiClientsAdd = require('./../../../../../entryPoints/api/commands/clients-add')
-    })
-
-    beforeEach(() => {
-      mockClients = []
-    })
-
-    afterEach(() => {
-      mockApi.module.Connection.mockClear()
-      mockDatabase.find.mockClear()
-      mockDatabase.insert.mockClear()
-      mockShellKillProcess.mockClear()
     })
 
     describe('triggers interactive mode if data isn\'t supplied as parameters', () => {
@@ -389,19 +232,14 @@ describe('API `clients:add` command', () => {
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
-          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual({
-            clientId: mockAnswers.id,
-            secret: mockAnswers.secret,
-            type: mockAnswers.type
-          })
-
           expect(mockSpinner.mock.calls[1][0]).toBe(
             `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}.`
           )
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
-          expect(mockShellKillProcess).toHaveBeenCalled()
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.type}`
+          )
         })
       })
 
@@ -416,17 +254,14 @@ describe('API `clients:add` command', () => {
         setMockInquirerAnswer(mockAnswers)
 
         return apiClientsAdd(args).then(stdout => {
-          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual({
-            clientId: mockAnswers.id,
-            secret: mockRandomSecret,
-            type: mockAnswers.type
-          })
-
           expect(mockSpinner.mock.calls[1][0]).toBe(
             `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}. The secret we generated for you is ${mockRandomSecret} – store it somewhere safe!`
           )
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
+
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockRandomSecret} ${mockAnswers.type}`
+          )
         })
       })
 
@@ -439,12 +274,7 @@ describe('API `clients:add` command', () => {
         }
 
         setMockInquirerAnswer(mockAnswers)
-
-        mockClients = [
-          {
-            clientId: mockAnswers.id
-          }
-        ]
+        mockExec.setNextResponse(new Error('ID_EXISTS'))
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
@@ -452,10 +282,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockAnswers.id} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
-          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockAnswers.id)
-          expect(mockDatabase.insert).not.toHaveBeenCalled()
-
-          expect(mockShellKillProcess).toHaveBeenCalled()
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.type}`
+          )
         })
       })
     })
@@ -475,18 +304,16 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
-          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual(mockArgs)
-
-          expect(mockShellKillProcess).toHaveBeenCalled()
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.type}`
+          )
         })
       })
 
       test('uses `user` as the default value for `type` if not supplied', () => {
         const mockArgs = {
           clientId: 'someClient',
-          secret: 'mySecret',
-          type: 'user'
+          secret: 'mySecret'
         }
         const args = argsHelper.getArgsForCommand(
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret}`
@@ -496,10 +323,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
-          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert.mock.calls[0][0].data).toEqual(mockArgs)
-
-          expect(mockShellKillProcess).toHaveBeenCalled()
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} user`
+          )
         })
       })
 
@@ -513,11 +339,7 @@ describe('API `clients:add` command', () => {
           `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
         )
 
-        mockClients = [
-          {
-            clientId: mockArgs.clientId
-          }
-        ]
+        mockExec.setNextResponse(new Error('ID_EXISTS'))
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
@@ -525,10 +347,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][0]).toBe(`The ID ${mockArgs.clientId} already exists`)
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
-          expect(mockDatabase.find.mock.calls[0][0].query.clientId).toBe(mockArgs.clientId)
-          expect(mockDatabase.insert).not.toHaveBeenCalled()
-
-          expect(mockShellKillProcess).toHaveBeenCalled()
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.type}`
+          )
         })
       })
     })

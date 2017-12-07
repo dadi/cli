@@ -1,3 +1,5 @@
+let nextResponse
+
 const mockCommandOutput = {
   'ls': 'dir1\ndir2\ndir3',
   'pwd': '/data/dadi/products/cli',
@@ -5,8 +7,20 @@ const mockCommandOutput = {
 }
 
 const mockExec = jest.fn((command, options, callback) => {
+  if (typeof options === 'function') {
+    callback = options
+  }
+
   setTimeout(() => {
-    const result = mockCommandOutput[command] || ''
+    let result
+
+    if (nextResponse) {
+      result = nextResponse
+
+      nextResponse = undefined
+    } else {
+      result = mockCommandOutput[command] || ''
+    }
 
     if (result instanceof Error) {
       callback(result, null, result.message)
@@ -26,3 +40,6 @@ beforeEach(() => {
 
 module.exports = mockExec
 module.exports.map = mockCommandOutput
+module.exports.setNextResponse = response => {
+  nextResponse = response
+}
