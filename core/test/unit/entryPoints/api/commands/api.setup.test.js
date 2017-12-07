@@ -156,15 +156,17 @@ describe('API `setup` command', () => {
 
       return apiSetup(args).then(out => {
         const expectedConfig = Object.assign({}, promptAnswers, {
-          _meta: undefined,
           auth: {
             datastore: promptAnswers.datastore,
             database: promptAnswers._meta.datastore.database
           }
         })
+
+        delete expectedConfig._meta
+
         const mockCall = configHelpers.saveAppConfig.mock.calls[0][0]
 
-        expect(configHelpers.saveAppConfig).toHaveBeenCalledTimes(2)
+        expect(configHelpers.saveAppConfig).toHaveBeenCalled()
         expect(mockCall.description).toBe('API configuration file')
         expect(mockCall.fileName).toBe(`config.${promptAnswers.env}.json`)
         expect(mockCall.app).toBe('@dadi/api')
@@ -274,7 +276,7 @@ describe('API `setup` command', () => {
             .toBe(promptAnswers._meta.datastore.password)
           expect(mockCall.config.database)
             .toBe(promptAnswers._meta.datastore.database)
-          expect(mockCall.config[promptAnswers._meta.datastore.database])
+          expect(mockCall.config.databases[promptAnswers._meta.datastore.database])
             .toEqual({
               hosts: [
                 {
