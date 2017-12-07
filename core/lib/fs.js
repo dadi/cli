@@ -29,6 +29,12 @@ FsHelpers.prototype.loadApp = function (name, {
 } = {}) {
   return new Promise((resolve, reject) => {
     try {
+      Object.keys(require.cache).forEach(cacheKey => {
+        if (cacheKey.includes(name)) {
+          delete require.cache[cacheKey]
+        }
+      })
+
       const app = require(
         path.resolve(
           process.cwd(),

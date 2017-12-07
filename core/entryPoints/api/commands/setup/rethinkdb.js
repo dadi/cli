@@ -1,15 +1,25 @@
 module.exports.buildConfig = (dbConfig, config) => {
   return {
-    'hosts': [
+    hosts: [
       {
-        'host': dbConfig.host,
-        'port': dbConfig.port
+        host: dbConfig.host,
+        port: dbConfig.port
       }
     ],
-    'username': dbConfig.username,
-    'password': dbConfig.password,
-    'database': dbConfig.database
+    username: dbConfig.username,
+    password: dbConfig.password,
+    database: dbConfig.database
   }
 }
 
 module.exports.handle = 'rethinkdb'
+module.exports.questions = {
+  host: true,
+  name: true,
+  username: true,
+  password: true,
+  port: true
+}
+module.exports.settings = {
+  defaultPort: 28015
+}
