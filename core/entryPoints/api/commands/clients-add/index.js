@@ -3,7 +3,7 @@
 const colors = require('colors')
 const fsHelpers = require('./../../../../lib/fs')
 const inquirer = require('inquirer')
-const mockRequire = require('mock-require')
+// const mockRequire = require('mock-require')
 const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../../lib/shell')
 const utilHelpers = require('./../../../../lib/util')
@@ -16,14 +16,18 @@ const createClient = ({
   type
 }) => {
   // Mocking these modules so that API doesn't polute stdout.
-  mockRequire('console-stamp', () => {})
-  mockRequire('bunyan', {
-    createLogger: () => ({
-      addStream: () => {}
-    }),
-    resolveLevel: () => {}
-  })
+  // mockRequire('console-stamp', () => {})
+  // mockRequire('bunyan', {
+  //   createLogger: () => ({
+  //     addStream: () => {}
+  //   }),
+  //   resolveLevel: () => {}
+  // })
   console.log = function () {}
+
+  const generatedSecret = secret === ''
+    ? utilHelpers.generatePassword()
+    : null
 
   return fsHelpers.loadApp('@dadi/api').then(app => {
     // Deciding which syntax to use based on the version of API.
@@ -35,15 +39,15 @@ const createClient = ({
       apiConfig: app.module.Config,
       apiConnection: app.module.Connection,
       clientId,
-      secret,
+      secret: generatedSecret || secret,
       type
     })
   }).then(docs => {
     if (message) {
       let messageString = `Created client with ID ${colors.bold(clientId)} and type ${colors.bold(type)}.`
 
-      if (generated) {
-        messageString += ` The secret we generated for you is ${colors.bold(secret)} – store it somewhere safe!`
+      if (generatedSecret) {
+        messageString += ` The secret we generated for you is ${colors.bold(generatedSecret)} – store it somewhere safe!`
       }
 
       message.succeed(messageString)
@@ -103,14 +107,6 @@ const renderQuestions = () => {
 
   return inquirer
     .prompt(questions)
-    .then(answers => {
-      if (answers.secret.length === 0) {
-        answers.secret = utilHelpers.generatePassword()
-        answers._generated = true
-      }
-
-      return answers
-    })
 }
 
 module.exports = args => {
