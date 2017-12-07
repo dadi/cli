@@ -1,46 +1,50 @@
 'use strict'
 
 const colors = require('colors')
+const exec = require('child_process').exec
+const fs = require('fs')
 const fsHelpers = require('./../../../../lib/fs')
 const inquirer = require('inquirer')
-// const mockRequire = require('mock-require')
+const path = require('path')
 const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../../lib/shell')
 const utilHelpers = require('./../../../../lib/util')
 
+const createRecordsFnV1V2 = fs.readFileSync(
+  path.join(__dirname, 'create-records-api-v1-v2.js'),
+  'utf8'
+)
+const createRecordsFnV3 = fs.readFileSync(
+  path.join(__dirname, 'create-records-api-v3.js'),
+  'utf8'
+)
+
 const createClient = ({
   clientId,
-  generated,
   message,
   secret,
   type
 }) => {
-  // Mocking these modules so that API doesn't polute stdout.
-  // mockRequire('console-stamp', () => {})
-  // mockRequire('bunyan', {
-  //   createLogger: () => ({
-  //     addStream: () => {}
-  //   }),
-  //   resolveLevel: () => {}
-  // })
-  console.log = function () {}
-
   const generatedSecret = secret === ''
     ? utilHelpers.generatePassword()
     : null
 
-  return fsHelpers.loadApp('@dadi/api').then(app => {
+  return fsHelpers.loadAppFile('@dadi/api', {
+    filePath: 'package.json'
+  }).then(pkg => {
     // Deciding which syntax to use based on the version of API.
-    let createRecordsFn = semverRangeCompare(app.pkg.version, '3.0.0') < 0
-      ? require('./create-records-api-v1-v2')
-      : require('./create-records-api-v3')
+    let createRecordsFn = semverRangeCompare(pkg.version, '3.0.0') < 0
+      ? createRecordsFnV1V2
+      : createRecordsFnV3
 
-    return createRecordsFn({
-      apiConfig: app.module.Config,
-      apiConnection: app.module.Connection,
-      clientId,
-      secret: generatedSecret || secret,
-      type
+    return new Promise((resolve, reject) => {
+      exec(`node -e "${createRecordsFn}" ${clientId} ${generatedSecret || secret} ${type}`, (err, stdout, stderr) => {
+        if (err) {
+          return reject(new Error(stderr))
+        }
+
+        resolve(stdout)
+      })
     })
   }).then(docs => {
     if (message) {
@@ -53,25 +57,14 @@ const createClient = ({
       message.succeed(messageString)
     }
   }).catch(err => {
-    switch (err && err.message) {
-      case 'ERR_LOADING_APP':
-        if (message) {
-          message.fail()
-        }
+    if (message) {
+      if (err && err.message.includes('ID_EXISTS')) {
+        message.fail(`The ID ${colors.bold(clientId)} already exists`)
 
-        break
+        return
+      }
 
-      case 'ID_EXISTS':
-        if (message) {
-          message.fail(`The ID ${colors.bold(clientId)} already exists`)
-        }
-
-        break
-
-      default:
-        if (message) {
-          message.fail('Could not create client')
-        }
+      message.fail('Could not create client')
     }
   })
 }
@@ -137,7 +130,6 @@ module.exports = args => {
 
       return createClient({
         clientId: answers.id,
-        generated: answers._generated,
         message,
         secret: answers.secret,
         type: answers.type
