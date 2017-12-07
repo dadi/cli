@@ -32,6 +32,13 @@ Setup.prototype.start = function (initialState = {}) {
   }
 
   this.steps.forEach(step => {
+    if (
+      typeof step.condition === 'function' &&
+      !step.condition(answers)
+    ) {
+      return
+    }
+
     if (step.text) {
       const percentage = Math.round(questionsAnswered / numberOfQuestions * 100)
       const percentageStr = ` (${percentage}% complete)`
