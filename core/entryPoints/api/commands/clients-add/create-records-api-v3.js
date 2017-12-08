@@ -44,18 +44,22 @@ const payload = {
 }
 
 const terminate = (err, message, db) => {
-  if (typeof db.close === 'function') {
-    db.close()
+  const exitProcess = () => {
+    if (err) {
+      console.error(err)
+
+      process.exit(1)
+    } else {
+      console.log(message)
+
+      process.exit(0)
+    }
   }
 
-  if (err) {
-    console.error(err)
-
-    process.exit(1)
+  if (typeof db.close === 'function') {
+    db.close().then(exitProcess)
   } else {
-    console.log(message)
-
-    process.exit(0)
+    exitProcess()
   }
 }
 
