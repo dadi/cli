@@ -43,6 +43,22 @@ const payload = {
   type
 }
 
+const terminate = (err, message, db) => {
+  if (typeof db.close === 'function') {
+    db.close()
+  }
+
+  if (err) {
+    console.error(err)
+
+    process.exit(1)
+  } else {
+    console.log(message)
+
+    process.exit(0)
+  }
+}
+
 let connected = false
 
 connection.on('connect', db => {
@@ -56,21 +72,15 @@ connection.on('connect', db => {
 
   db.find({ query, collection: clientCollectionName, options: {}, schema: getClientStoreSchema() }).then(existingClients => {
     if (existingClients.results.length > 0) {
-      console.error('ID_EXISTS')
-
-      process.exit(1)
+      terminate(new Error('ID_EXISTS'), null, db)
     }
 
     db.insert({ data: payload, collection: clientCollectionName, schema: getClientStoreSchema() }).then(result => {
-      process.exit(0)
+      terminate(null, result, db)
     }).catch(err => {
-      console.error(err)
-
-      process.exit(1)
+      terminate(err, null, db)
     })
   }).catch(err => {
-    console.error(err)
-
-    process.exit(1)
+    terminate(err, null, db)
   })
 })
