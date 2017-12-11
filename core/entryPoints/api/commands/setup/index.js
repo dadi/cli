@@ -70,7 +70,7 @@ const steps = [
         default: 'my-api.com'
       },
       {
-        name: 'publicUrl.host',
+        name: 'publicUrl.port',
         message: 'What is the port?',
         default: 80
       }
