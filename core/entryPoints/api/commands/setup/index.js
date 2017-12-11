@@ -261,16 +261,16 @@ const steps = [
         name: 'media.storage',
         choices: [
           {
+            name: 'Nowhere, I don\'t want API to handle media',
+            value: undefined
+          },
+          {
             name: 'Disk storage',
             value: 'disk'
           },
           {
             name: 'Amazon S3 bucket',
             value: 's3'
-          },
-          {
-            name: 'Nowhere, I don\'t want API to handle media',
-            value: undefined
           }
         ],
         message: 'Where should API store uploaded assets?'
