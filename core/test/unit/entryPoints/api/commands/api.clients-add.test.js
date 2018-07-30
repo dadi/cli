@@ -66,7 +66,7 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'testClient',
           secret: 'superSecret',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
@@ -76,7 +76,7 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1V2}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.type}`
+            `node -e "${createRecordsFnV1V2}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.accessType}`
           )
         })
       })
@@ -86,14 +86,14 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'testClient',
           secret: '',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1V2}" ${mockAnswers.id} ${mockRandomSecret} ${mockAnswers.type}`
+            `node -e "${createRecordsFnV1V2}" ${mockAnswers.id} ${mockRandomSecret} ${mockAnswers.accessType}`
           )
         })
       })
@@ -103,7 +103,7 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'existingClient',
           secret: 'superSecret',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
@@ -122,7 +122,7 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'existingClient',
           secret: 'superSecret',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
@@ -138,26 +138,26 @@ describe('API `clients:add` command', () => {
     })
 
     describe('uses data passed as parameters', () => {
-      test('creates a client with the clientId, secret and type passed as parameters', () => {
+      test('creates a client with the clientId, secret and access type passed as parameters', () => {
         const mockArgs = {
           clientId: 'someClient',
           secret: 'mySecret',
-          type: 'admin'
+          accessType: 'admin'
         }
         const args = argsHelper.getArgsForCommand(
-          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
+          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --accessType=${mockArgs.accessType}`
         )
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1V2}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.type}`
+            `node -e "${createRecordsFnV1V2}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.accessType}`
           )
         })
       })
 
-      test('uses `user` as the default value for `type` if not supplied', () => {
+      test('uses `user` as the default value for `accessType` is not supplied', () => {
         const mockArgs = {
           clientId: 'someClient',
           secret: 'mySecret'
@@ -179,10 +179,10 @@ describe('API `clients:add` command', () => {
         const mockArgs = {
           clientId: 'existingClient',
           secret: 'mySecret',
-          type: 'admin'
+          accessType: 'admin'
         }
         const args = argsHelper.getArgsForCommand(
-          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
+          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --accessType=${mockArgs.accessType}`
         )
 
         mockExec.setNextResponse(new Error('ID_EXISTS'))
@@ -224,7 +224,7 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'testClient',
           secret: 'superSecret',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
@@ -233,12 +233,12 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockSpinner.mock.calls[1][0]).toBe(
-            `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}.`
+            `Created client with ID ${mockAnswers.id} and access type ${mockAnswers.accessType}.`
           )
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.type}`
+            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.accessType}`
           )
         })
       })
@@ -248,19 +248,19 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'testClient',
           secret: '',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockSpinner.mock.calls[1][0]).toBe(
-            `Created client with ID ${mockAnswers.id} and type ${mockAnswers.type}. The secret we generated for you is ${mockRandomSecret} – store it somewhere safe!`
+            `Created client with ID ${mockAnswers.id} and access type ${mockAnswers.accessType}. The secret we generated for you is ${mockRandomSecret} – store it somewhere safe!`
           )
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockRandomSecret} ${mockAnswers.type}`
+            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockRandomSecret} ${mockAnswers.accessType}`
           )
         })
       })
@@ -270,7 +270,7 @@ describe('API `clients:add` command', () => {
         const mockAnswers = {
           id: 'existingClient',
           secret: 'superSecret',
-          type: 'admin'
+          accessType: 'admin'
         }
 
         setMockInquirerAnswer(mockAnswers)
@@ -283,21 +283,21 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.type}`
+            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${mockAnswers.secret} ${mockAnswers.accessType}`
           )
         })
       })
     })
 
     describe('uses data passed as parameters', () => {
-      test('creates a client with the clientId, secret and type passed as parameters', () => {
+      test('creates a client with the clientId, secret and accessType passed as parameters', () => {
         const mockArgs = {
           clientId: 'someClient',
           secret: 'mySecret',
-          type: 'admin'
+          accessType: 'admin'
         }
         const args = argsHelper.getArgsForCommand(
-          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
+          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --accessType=${mockArgs.accessType}`
         )
 
         return apiClientsAdd(args).then(stdout => {
@@ -305,12 +305,12 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.type}`
+            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.accessType}`
           )
         })
       })
 
-      test('uses `user` as the default value for `type` if not supplied', () => {
+      test('uses `user` as the default value for `accessType` if not supplied', () => {
         const mockArgs = {
           clientId: 'someClient',
           secret: 'mySecret'
@@ -333,10 +333,10 @@ describe('API `clients:add` command', () => {
         const mockArgs = {
           clientId: 'existingClient',
           secret: 'mySecret',
-          type: 'admin'
+          accessType: 'admin'
         }
         const args = argsHelper.getArgsForCommand(
-          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --type=${mockArgs.type}`
+          `dadi api clients:add --id=${mockArgs.clientId} --secret=${mockArgs.secret} --accessType=${mockArgs.accessType}`
         )
 
         mockExec.setNextResponse(new Error('ID_EXISTS'))
@@ -348,7 +348,7 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.type}`
+            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${mockArgs.secret} ${mockArgs.accessType}`
           )
         })
       })

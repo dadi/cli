@@ -2,7 +2,7 @@ const apiConfig = require('@dadi/api').Config
 const apiConnection = require('@dadi/api').Connection
 const clientId = process.argv[1]
 const secret = process.argv[2]
-const type = process.argv[3]
+const accessType = process.argv[3]
 
 const getClientStoreSchema = () => {
   return {
@@ -40,7 +40,7 @@ const connection = apiConnection(dbOptions, apiConfig.get('auth.datastore'))
 const payload = {
   clientId,
   secret,
-  type
+  accessType
 }
 
 const terminate = (err, message, db) => {
