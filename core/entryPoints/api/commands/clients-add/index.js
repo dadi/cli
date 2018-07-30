@@ -23,7 +23,7 @@ const createClient = ({
   clientId,
   message,
   secret,
-  type
+  accessType
 }) => {
   const generatedSecret = secret === ''
     ? utilHelpers.generatePassword()
@@ -38,7 +38,7 @@ const createClient = ({
       : createRecordsFnV3
 
     return new Promise((resolve, reject) => {
-      exec(`node -e "${createRecordsFn}" ${clientId} ${generatedSecret || secret} ${type}`, (err, stdout, stderr) => {
+      exec(`node -e "${createRecordsFn}" ${clientId} ${generatedSecret || secret} ${accessType}`, (err, stdout, stderr) => {
         if (err) {
           return reject(new Error(stderr))
         }
@@ -48,7 +48,7 @@ const createClient = ({
     })
   }).then(docs => {
     if (message) {
-      let messageString = `Created client with ID ${colors.bold(clientId)} and type ${colors.bold(type)}.`
+      let messageString = `Created client with ID ${colors.bold(clientId)} and access type ${colors.bold(accessType)}.`
 
       if (generatedSecret) {
         messageString += ` The secret we generated for you is ${colors.bold(generatedSecret)} – store it somewhere safe!`
@@ -83,7 +83,7 @@ const renderQuestions = () => {
     },
     {
       type: 'list',
-      name: 'type',
+      name: 'accessType',
       message: 'What type of access does the user require?',
       choices: [
         {
@@ -122,7 +122,7 @@ module.exports = args => {
       clientId: args.id,
       message,
       secret: args.secret,
-      type: args.type || 'user'
+      accessType: args.accessType || 'user'
     })
   } else {
     return renderQuestions().then(answers => {
@@ -132,7 +132,7 @@ module.exports = args => {
         clientId: answers.id,
         message,
         secret: answers.secret,
-        type: answers.type
+        accessType: answers.accessType
       })
     })
   }
