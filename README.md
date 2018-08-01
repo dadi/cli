@@ -44,7 +44,7 @@ Commands always start with `dadi <product> <command>`, taking different paramete
 The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help <product>` and `dadi help <product> <command>` provides detailed information about a product and a command, respectively.
 
 ## Links
-* [CLI Documentation](http://docs.dadi.tech/cli/)
+* [CLI Documentation](https://docs.dadi.cloud/cli/)
 
 ## Development
 
