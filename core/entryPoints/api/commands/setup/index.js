@@ -419,10 +419,10 @@ const launchSetup = ({
         const createClientMessage = shellHelpers.showSpinner('Creating a new client')
 
         return clientsAdd.createClient({
+          accessType: metaAnswers.client.accessType,
           clientId: metaAnswers.client.clientId,
           message: createClientMessage,
-          secret: metaAnswers.client.secret,
-          type: metaAnswers.client.accessType
+          secret: metaAnswers.client.secret
         })
       }
     })
