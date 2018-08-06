@@ -1,6 +1,7 @@
 require('./../../helpers/disable-colours')
 
 const cliFormat = require('cli-format')
+const constants = require('./../../../lib/constants')
 const format = require('./../../../lib/format')
 
 const buildKeyValueTable = format.buildKeyValueTable
@@ -117,7 +118,7 @@ describe('Format helper', () => {
 
         const help = format.getCommandHelp(mockEntryPointNoInlineParameters, 'new')
 
-        expect(help).toContain('$ dadi foo new --useBar --useBaz --version\n')
+        expect(help).toContain(`$ ${constants.rootCommand} foo new --useBar --useBaz --version\n`)
       })
 
       test('contains the full command skeleton with all the available inline parameters', () => {
@@ -133,13 +134,13 @@ describe('Format helper', () => {
 
         const help = format.getCommandHelp(mockEntryPointNoFlagParameters, 'new')
 
-        expect(help).toContain('$ dadi foo new <name>\n')
+        expect(help).toContain(`$ ${constants.rootCommand} foo new <name>\n`)
       })
 
       test('contains the full command skeleton with all the available inline and flag parameters', () => {
         const help = format.getCommandHelp(mockEntryPoint, 'new')
 
-        expect(help).toContain('$ dadi foo new <name> --useBar --useBaz --version\n')
+        expect(help).toContain(`$ ${constants.rootCommand} foo new <name> --useBar --useBaz --version\n`)
       })
 
       test('contains the list of available commands and their description', () => {
@@ -178,7 +179,7 @@ describe('Format helper', () => {
       test('contains the full command skeleton without any parameters', () => {
         const help = format.getCommandHelp(mockEntryPointNoParameters, 'new')
 
-        expect(help).toContain('$ dadi foo new\n')
+        expect(help).toContain(`$ ${constants.rootCommand} foo new\n`)
       })
 
       test('does not contain the "Available parameters:" string', () => {
@@ -261,7 +262,7 @@ describe('Format helper', () => {
     test('contains the skeleton command', () => {
       const help = format.getEntryPointHelp(mockEntryPoint)
 
-      expect(help).toContain('$ dadi foo <command>\n')
+      expect(help).toContain(`$ ${constants.rootCommand} foo <command>\n`)
     })
 
     test('contains the list of available commands', () => {
@@ -275,7 +276,7 @@ describe('Format helper', () => {
     test('contains the help text', () => {
       const help = format.getEntryPointHelp(mockEntryPoint)
 
-      expect(help).toContain('Type dadi help foo <command> to learn more about a specific command.')
+      expect(help).toContain(`Type ${constants.rootCommand} help foo <command> to learn more about a specific command.`)
     })
 
     test('flags a given command as invalid if the `invalidCommand` argument is present', () => {
@@ -334,14 +335,14 @@ describe('Format helper', () => {
     test('contains the list of commands for each entry point', () => {
       const help = format.getGeneralHelp(mockEntryPoints)
 
-      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.foo, 'dadi foo '))
-      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.bar, 'dadi bar '))
+      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.foo, `${constants.rootCommand} foo `))
+      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.bar, `${constants.rootCommand} bar `))
     })
 
     test('contains the help text', () => {
       const help = format.getGeneralHelp(mockEntryPoints)
 
-      expect(help).toContain('Type dadi help <command> to learn more about a specific command.')
+      expect(help).toContain(`Type ${constants.rootCommand} help <command> to learn more about a specific command.`)
     })
   })
 })

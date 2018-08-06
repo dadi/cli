@@ -74,7 +74,7 @@ describe('CDN `setup` command', () => {
   })
 
   test('writes the API configuration file', () => {
-    const args = argsHelper.getArgsForCommand('dadi api setup')
+    const args = argsHelper.getArgsForCommand('api setup')
 
     mockInquirer.setAnswer(promptAnswers)
 

@@ -34,7 +34,7 @@ describe('CDN `new` command', () => {
   })
 
   test('pings the versions API endpoint to get the list of available versions for the given product', () => {
-    const args = argsHelper.getArgsForCommand('dadi cdn new')
+    const args = argsHelper.getArgsForCommand('cdn new')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.0', '2.0'])
@@ -47,7 +47,7 @@ describe('CDN `new` command', () => {
   })
 
   test('displays an error message if the given version is not valid', () => {
-    const args = argsHelper.getArgsForCommand('dadi cdn new --version=2.x')
+    const args = argsHelper.getArgsForCommand('cdn new --version=2.x')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.3', '1.5'])
@@ -63,7 +63,7 @@ describe('CDN `new` command', () => {
 
   describe('alerts the user when the target directory exists and is not empty', () => {
     test('when specifying a directory', () => {
-      const args = argsHelper.getArgsForCommand('dadi cdn new my-existing-dir')
+      const args = argsHelper.getArgsForCommand('cdn new my-existing-dir')
 
       fs.readdir = jest.fn(path => {
         return Promise.resolve([
@@ -89,7 +89,7 @@ describe('CDN `new` command', () => {
     })
 
     test('when not specifying a directory', () => {
-      const args = argsHelper.getArgsForCommand('dadi cdn new')
+      const args = argsHelper.getArgsForCommand('cdn new')
 
       fs.readdir = jest.fn(path => {
         return Promise.resolve([
@@ -116,7 +116,7 @@ describe('CDN `new` command', () => {
   })  
 
   test('uses the directory specified in the command if one is specified, constructing the success message accordingly', () => {
-    const args = argsHelper.getArgsForCommand('dadi cdn new my-new-cdn')
+    const args = argsHelper.getArgsForCommand('cdn new my-new-cdn')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.x', '2.x'])
@@ -137,7 +137,7 @@ describe('CDN `new` command', () => {
   })
 
   test('uses the current directory if none is specified, constructing the success message accordingly', () => {
-    const args = argsHelper.getArgsForCommand('dadi cdn new')
+    const args = argsHelper.getArgsForCommand('cdn new')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.x', '2.x'])
@@ -157,7 +157,7 @@ describe('CDN `new` command', () => {
 
   describe('setup command', () => {
     test('is initiated with the correct directory when a directory is specified', () => {
-      const args = argsHelper.getArgsForCommand('dadi cdn new my-new-cdn')
+      const args = argsHelper.getArgsForCommand('cdn new my-new-cdn')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x'])
@@ -169,7 +169,7 @@ describe('CDN `new` command', () => {
     })
 
     test('is initiated with the correct directory when a directory is not specified', () => {
-      const args = argsHelper.getArgsForCommand('dadi cdn new')
+      const args = argsHelper.getArgsForCommand('cdn new')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x'])
@@ -181,7 +181,7 @@ describe('CDN `new` command', () => {
     })
 
     test('is not called when the --skip-setup parameter is supplied', () => {
-      const args = argsHelper.getArgsForCommand('dadi cdn new --skip-setup')
+      const args = argsHelper.getArgsForCommand('cdn new --skip-setup')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x'])

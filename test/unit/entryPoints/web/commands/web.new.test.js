@@ -51,7 +51,7 @@ describe('Web `new` command', () => {
   })
 
   test('pings the versions API endpoint to get the list of available versions for the given product', () => {
-    const args = argsHelper.getArgsForCommand('dadi web new')
+    const args = argsHelper.getArgsForCommand('web new')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.0', '2.0'])
@@ -64,7 +64,7 @@ describe('Web `new` command', () => {
   })
 
   test('displays an error message if the given version is not valid', () => {
-    const args = argsHelper.getArgsForCommand('dadi web new --version=2.x')
+    const args = argsHelper.getArgsForCommand('web new --version=2.x')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.3', '1.5'])
@@ -80,7 +80,7 @@ describe('Web `new` command', () => {
 
   describe('alerts the user when the target directory exists and is not empty', () => {
     test('when specifying a directory', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new my-existing-dir')
+      const args = argsHelper.getArgsForCommand('web new my-existing-dir')
 
       fs.readdir = jest.fn(path => {
         return Promise.resolve([
@@ -106,7 +106,7 @@ describe('Web `new` command', () => {
     })
 
     test('when not specifying a directory', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new')
+      const args = argsHelper.getArgsForCommand('web new')
 
       fs.readdir = jest.fn(path => {
         return Promise.resolve([
@@ -133,7 +133,7 @@ describe('Web `new` command', () => {
   })  
 
   test('uses the directory specified in the command if one is specified, constructing the success message accordingly', () => {
-    const args = argsHelper.getArgsForCommand('dadi web new my-new-web')
+    const args = argsHelper.getArgsForCommand('web new my-new-web')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.x', '2.x'])
@@ -154,7 +154,7 @@ describe('Web `new` command', () => {
   })
 
   test('uses the current directory if none is specified, constructing the success message accordingly', () => {
-    const args = argsHelper.getArgsForCommand('dadi web new')
+    const args = argsHelper.getArgsForCommand('web new')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.x', '2.x'])
@@ -174,7 +174,7 @@ describe('Web `new` command', () => {
 
   describe('template engine configuration for versions >= 3.0', () => {
     test('installs and initialises the engines provided in the `--engine` parameter', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new --engine=@dadi/web-dustjs --engine=@dadi/web-pugjs')
+      const args = argsHelper.getArgsForCommand('web new --engine=@dadi/web-dustjs --engine=@dadi/web-pugjs')
 
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -206,7 +206,7 @@ describe('Web `new` command', () => {
     })
 
     test('retrieves from npm the list of available engines if a `--engine` parameter is not provided', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new')
+      const args = argsHelper.getArgsForCommand('web new')
 
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -229,7 +229,7 @@ describe('Web `new` command', () => {
     })
 
     test('prompts the user to select the template engines to be installed', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new')
+      const args = argsHelper.getArgsForCommand('web new')
 
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -283,7 +283,7 @@ describe('Web `new` command', () => {
     })
 
     test('installs and initialises the engines selected by the user in the interactive prompt', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new')
+      const args = argsHelper.getArgsForCommand('web new')
 
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -346,7 +346,7 @@ describe('Web `new` command', () => {
     })
 
     test('installs and initialises Dust.js even if not selected by the user', () => {
-      const args = argsHelper.getArgsForCommand('dadi web new')
+      const args = argsHelper.getArgsForCommand('web new')
 
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])

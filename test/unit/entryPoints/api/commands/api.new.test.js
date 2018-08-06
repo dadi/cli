@@ -35,7 +35,7 @@ describe('API `new` command', () => {
   })
 
   test('pings the versions API endpoint to get the list of available versions for the given product', () => {
-    const args = argsHelper.getArgsForCommand('dadi api new')
+    const args = argsHelper.getArgsForCommand('api new')
 
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.0', '2.0'])
@@ -48,7 +48,7 @@ describe('API `new` command', () => {
   })
 
   test('displays an error message if the given version is not valid', () => {
-    const args = argsHelper.getArgsForCommand('dadi api new --version=2.x')
+    const args = argsHelper.getArgsForCommand('api new --version=2.x')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.3', '1.5'])
@@ -64,7 +64,7 @@ describe('API `new` command', () => {
 
   describe('alerts the user when the target directory exists and is not empty', () => {
     test('when specifying a directory', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new my-existing-dir')
+      const args = argsHelper.getArgsForCommand('api new my-existing-dir')
 
       fs.readdir = jest.fn(path => {
         return Promise.resolve([
@@ -90,7 +90,7 @@ describe('API `new` command', () => {
     })
 
     test('when not specifying a directory', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new')
+      const args = argsHelper.getArgsForCommand('api new')
 
       fs.readdir = jest.fn(path => {
         return Promise.resolve([
@@ -117,7 +117,7 @@ describe('API `new` command', () => {
   })
 
   test('uses the directory specified in the command if one is specified, constructing the success message accordingly', () => {
-    const args = argsHelper.getArgsForCommand('dadi api new my-new-api')
+    const args = argsHelper.getArgsForCommand('api new my-new-api')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.x', '2.x'])
@@ -138,7 +138,7 @@ describe('API `new` command', () => {
   })
 
   test('uses the current directory if none is specified, constructing the success message accordingly', () => {
-    const args = argsHelper.getArgsForCommand('dadi api new')
+    const args = argsHelper.getArgsForCommand('api new')
     
     registry.getBoilerplateVersions = jest.fn(product => {
       return Promise.resolve(['1.x', '2.x'])
@@ -177,7 +177,7 @@ describe('API `new` command', () => {
     ]
 
     test('is not shown if API version is prior to 3.0', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new')
+      const args = argsHelper.getArgsForCommand('api new')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x'])
@@ -193,7 +193,7 @@ describe('API `new` command', () => {
     })
 
     test('is not shown if the `--database` parameter is supplied', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new --database=@dadi/api-mongodb')
+      const args = argsHelper.getArgsForCommand('api new --database=@dadi/api-mongodb')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -209,7 +209,7 @@ describe('API `new` command', () => {
     })
 
     test('is shown if API version is greater than 3.0 and the `--database` parameter is not supplied', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new')
+      const args = argsHelper.getArgsForCommand('api new')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -257,7 +257,7 @@ describe('API `new` command', () => {
   
   describe('setup command', () => {
     test('is not executed if the `--skip-setup` parameter has been supplied', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new --database=@dadi/api-mongodb --skip-setup')
+      const args = argsHelper.getArgsForCommand('api new --database=@dadi/api-mongodb --skip-setup')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -273,7 +273,7 @@ describe('API `new` command', () => {
     })
 
     test('is executed if the `--skip-setup` parameter has not been supplied', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new --database=@dadi/api-mongodb')
+      const args = argsHelper.getArgsForCommand('api new --database=@dadi/api-mongodb')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x', '3.x'])
@@ -291,7 +291,7 @@ describe('API `new` command', () => {
     })
 
     test('resolves even if the version of API being installed is not supported by the setup command', () => {
-      const args = argsHelper.getArgsForCommand('dadi api new')
+      const args = argsHelper.getArgsForCommand('api new')
       
       registry.getBoilerplateVersions = jest.fn(product => {
         return Promise.resolve(['1.x', '2.x'])

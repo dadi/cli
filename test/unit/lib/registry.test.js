@@ -1,4 +1,4 @@
-const constants = require('./../../../../shared/constants')
+const constants = require('./../../../lib/constants')
 const fs = require('fs-extra')
 const mockSpinner = require('./../../helpers/MockSpinner')
 const nock = require('nock')

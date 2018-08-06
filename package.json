@@ -1,12 +1,11 @@
 {
-  "name": "@dadi/cli-core",
-  "version": "2.1.6",
+  "name": "dadi-cli",
+  "version": "3.0.0",
   "description": "A command-line tool for installation and customisation of the DADI platform",
   "main": "index.js",
   "bin": {
-    "dadi": "bin/dadi.js"
+    "dadi-cli": "index.js"
   },
-  "preferGlobal": "true",
   "keywords": [],
   "author": "eb@dadi.co",
   "license": "ISC",
@@ -74,14 +73,6 @@
   "standard": {
     "ignore": [
       "test/**/*"
-    ]
-  },
-  "pkg": {
-    "targets": [
-      "node7-alpine-x64",
-      "node7-linux-x64",
-      "node7-macos-x64",
-      "node7-win-x64"
     ]
   }
 }

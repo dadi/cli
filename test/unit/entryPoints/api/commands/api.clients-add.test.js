@@ -62,7 +62,7 @@ describe('API `clients:add` command', () => {
 
     describe('triggers interactive mode if data isn\'t supplied as parameters', () => {
       test('prompts the user for a clientId and secret and creates a client with the answers', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'testClient',
           secret: 'superSecret',
@@ -82,7 +82,7 @@ describe('API `clients:add` command', () => {
       })
 
       test('generates a random secret if the user leaves the answer empty', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'testClient',
           secret: '',
@@ -99,7 +99,7 @@ describe('API `clients:add` command', () => {
       })
 
       test('displays an error message if there is already a client with the ID supplied', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'existingClient',
           secret: 'superSecret',
@@ -118,7 +118,7 @@ describe('API `clients:add` command', () => {
       })
 
       test('displays an error message if the operation has failed', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'existingClient',
           secret: 'superSecret',
@@ -220,7 +220,7 @@ describe('API `clients:add` command', () => {
 
     describe('triggers interactive mode if data isn\'t supplied as parameters', () => {
       test('prompts the user for a clientId and secret and creates a client with the answers', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'testClient',
           secret: 'superSecret',
@@ -244,7 +244,7 @@ describe('API `clients:add` command', () => {
       })
 
       test('generates a random secret if the user leaves the answer empty', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'testClient',
           secret: '',
@@ -266,7 +266,7 @@ describe('API `clients:add` command', () => {
       })
 
       test('displays an error message if there is already a client with the ID supplied', () => {
-        const args = argsHelper.getArgsForCommand('dadi api clients:add')
+        const args = argsHelper.getArgsForCommand('api clients:add')
         const mockAnswers = {
           id: 'existingClient',
           secret: 'superSecret',

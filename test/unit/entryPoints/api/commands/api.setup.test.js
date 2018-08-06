@@ -61,7 +61,7 @@ describe('API `setup` command', () => {
     })
 
     test('returns an `UNSUPPORTED_VERSION` error', () => {
-      const args = argsHelper.getArgsForCommand('dadi api setup')
+      const args = argsHelper.getArgsForCommand('api setup')
 
       return apiSetup(args).catch(err => {
         expect(err.message).toBe('UNSUPPORTED_VERSION')
@@ -143,7 +143,7 @@ describe('API `setup` command', () => {
     })
 
     test('writes the API configuration file', () => {
-      const args = argsHelper.getArgsForCommand('dadi api setup')
+      const args = argsHelper.getArgsForCommand('api setup')
 
       const request = nock(registryUrl)
         .get('/-/v1/search')
@@ -184,7 +184,7 @@ describe('API `setup` command', () => {
       })
 
       test('is called if the user has chosen to create a client', () => {
-        const args = argsHelper.getArgsForCommand('dadi api setup')
+        const args = argsHelper.getArgsForCommand('api setup')
 
         mockInquirer.setAnswer(promptAnswers)
 
@@ -194,13 +194,13 @@ describe('API `setup` command', () => {
             .toBe(promptAnswers._meta.client.clientId)
           expect(apiClientsAdd.createClient.mock.calls[0][0].secret)
             .toBe(promptAnswers._meta.client.secret)
-          expect(apiClientsAdd.createClient.mock.calls[0][0].type)
+          expect(apiClientsAdd.createClient.mock.calls[0][0].accessType)
             .toBe(promptAnswers._meta.client.accessType)
         })
       })
 
       test('is not called if the user has chosen not to create a client', () => {
-        const args = argsHelper.getArgsForCommand('dadi api setup')
+        const args = argsHelper.getArgsForCommand('api setup')
 
         promptAnswers._meta.client.create = false
 
@@ -219,7 +219,7 @@ describe('API `setup` command', () => {
       })
 
       test('writes the database configuration file', () => {
-        const args = argsHelper.getArgsForCommand('dadi api setup')
+        const args = argsHelper.getArgsForCommand('api setup')
 
         mockInquirer.setAnswer(promptAnswers)
 
@@ -253,7 +253,7 @@ describe('API `setup` command', () => {
       })
 
       test('writes the database configuration file', () => {
-        const args = argsHelper.getArgsForCommand('dadi api setup')
+        const args = argsHelper.getArgsForCommand('api setup')
 
         mockInquirer.setAnswer(promptAnswers)
 
