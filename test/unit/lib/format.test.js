@@ -76,19 +76,14 @@ describe('Format helper', () => {
               },
               {
                 key: 'version',
-                description: 'the version of Foo to install (defaults to latest)'
+                description: 'the version of Foo to install (defaults to latest)',
+                type: 'string'
               }
             ]
           }
         }
       }
     }
-
-    test('contains the DADI header', () => {
-      const help = format.getCommandHelp(mockEntryPoint, 'new')
-
-      expect(help).toContain(format.getHeader())
-    })
 
     test('contains the command description', () => {
       const help = format.getCommandHelp(mockEntryPoint, 'new')
@@ -116,7 +111,7 @@ describe('Format helper', () => {
 
         const help = format.getCommandHelp(mockEntryPointNoInlineParameters, 'new')
 
-        expect(help).toContain(`$ ${constants.rootCommand} foo new --useBar --useBaz --version\n`)
+        expect(help).toContain(`Usage: ${constants.rootCommand} foo new --useBar --useBaz --version=<version>\n`)
       })
 
       test('contains the full command skeleton with all the available inline parameters', () => {
@@ -132,13 +127,13 @@ describe('Format helper', () => {
 
         const help = format.getCommandHelp(mockEntryPointNoFlagParameters, 'new')
 
-        expect(help).toContain(`$ ${constants.rootCommand} foo new <name>\n`)
+        expect(help).toContain(`Usage: ${constants.rootCommand} foo new <name>\n`)
       })
 
       test('contains the full command skeleton with all the available inline and flag parameters', () => {
         const help = format.getCommandHelp(mockEntryPoint, 'new')
 
-        expect(help).toContain(`$ ${constants.rootCommand} foo new <name> --useBar --useBaz --version\n`)
+        expect(help).toContain(`Usage: ${constants.rootCommand} foo new <name> --useBar --useBaz --version=<version>\n`)
       })
 
       test('contains the list of available commands and their description', () => {
@@ -177,7 +172,7 @@ describe('Format helper', () => {
       test('contains the full command skeleton without any parameters', () => {
         const help = format.getCommandHelp(mockEntryPointNoParameters, 'new')
 
-        expect(help).toContain(`$ ${constants.rootCommand} foo new\n`)
+        expect(help).toContain(`Usage: ${constants.rootCommand} foo new\n`)
       })
 
       test('does not contain the "Available parameters:" string', () => {
@@ -251,23 +246,16 @@ describe('Format helper', () => {
       }
     }
 
-    test('contains the DADI header', () => {
-      const help = format.getEntryPointHelp(mockEntryPoint)
-
-      expect(help).toContain(format.getHeader())
-    })
-
     test('contains the skeleton command', () => {
       const help = format.getEntryPointHelp(mockEntryPoint)
 
-      expect(help).toContain(`$ ${constants.rootCommand} foo <command>\n`)
+      expect(help).toContain(`Usage: ${constants.rootCommand} foo <command>\n`)
     })
 
     test('contains the list of available commands', () => {
       const help = format.getEntryPointHelp(mockEntryPoint)
-      const commandsTable = format.getEntryPointCommands(mockEntryPoint)
+      const commandsTable = format.getEntryPointCommands(mockEntryPoint, '  ')
 
-      expect(help).toContain('Available commands:\n')
       expect(help).toContain(commandsTable)
     })
 
@@ -318,12 +306,6 @@ describe('Format helper', () => {
       }
     }
 
-    test('contains the DADI header', () => {
-      const help = format.getGeneralHelp(mockEntryPoints)
-
-      expect(help).toContain(format.getHeader())
-    })
-
     test('flags a given command as invalid if the `invalidCommand` argument is present', () => {
       const help = format.getGeneralHelp(mockEntryPoints, 'no-such-command')
 
@@ -333,8 +315,8 @@ describe('Format helper', () => {
     test('contains the list of commands for each entry point', () => {
       const help = format.getGeneralHelp(mockEntryPoints)
 
-      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.foo, `${constants.rootCommand} foo `))
-      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.bar, `${constants.rootCommand} bar `))
+      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.foo, `  foo `))
+      expect(help).toContain(format.getEntryPointCommands(mockEntryPoints.bar, `  bar `))
     })
 
     test('contains the help text', () => {

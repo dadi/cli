@@ -144,11 +144,13 @@ module.exports.parameters = {
   flags: [
     {
       key: 'id',
-      description: 'the client ID'
+      description: 'the client ID',
+      type: 'string'
     },
     {
       key: 'secret',
-      description: 'the client secret'
+      description: 'the client secret',
+      type: 'string'
     }
   ]
 }
