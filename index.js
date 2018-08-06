@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 const cli = require('./app')
 
 // Some commands may destroy the global reference to
