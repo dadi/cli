@@ -6,4 +6,4 @@ node_js:
   - '8'
   - '7'
   - '6'
-script: npm install && npm test
+script: npm install && FORCE_COLOR=0 npm test
