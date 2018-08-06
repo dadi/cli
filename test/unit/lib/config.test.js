@@ -1,5 +1,3 @@
-require('./../../helpers/disable-colours')
-
 const mockSpinner = require('./../../helpers/MockSpinner')
 const path = require('path')
 const getTime = Date.prototype.getTime

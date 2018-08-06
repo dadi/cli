@@ -1,5 +1,3 @@
-require('./../../../../helpers/disable-colours')
-
 const argsHelper = require('./../../../../helpers/args')
 const fs = require('fs')
 const mockDadiApi = require('./../../../../helpers/MockDadiApi')

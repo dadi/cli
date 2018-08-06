@@ -1,5 +1,3 @@
-require('./../../../../helpers/disable-colours')
-
 const argsHelper = require('./../../../../helpers/args')
 const fs = require('fs-extra')
 const mockExec = require('./../../../../helpers/MockExec')

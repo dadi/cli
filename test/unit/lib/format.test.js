@@ -1,5 +1,3 @@
-require('./../../helpers/disable-colours')
-
 const cliFormat = require('cli-format')
 const constants = require('./../../../lib/constants')
 const format = require('./../../../lib/format')

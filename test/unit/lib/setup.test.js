@@ -1,5 +1,3 @@
-require('./../../helpers/disable-colours')
-
 const mockInquirer = require('./../../helpers/mockInquirer')
 const MockSpinner = require('./../../helpers/MockSpinner')
 const format = require('./../../../lib/format')
