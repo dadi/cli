@@ -21,7 +21,7 @@ coberturaBadger(opts, function parsingResults(err, badgeStatus) {
     console.log('An error occurred: ' + err.message)
   }
 
-  const readme = path.resolve(__dirname + '/../../../README.md')
+  const readme = path.resolve(__dirname + '/../../README.md')
   const badgeUrl = badgeStatus.url // e.g. http://img.shields.io/badge/coverage-60%-yellow.svg
 
   // open the README.md and add this url
