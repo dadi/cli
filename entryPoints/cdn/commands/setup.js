@@ -288,7 +288,7 @@ const launchSetup = () => {
     return configHelpers.saveAppConfig({
       app,
       config: answers,
-      description: 'API configuration file',
+      description: 'CDN configuration file',
       fileName: `config.${answers.env}.json`
     })
   })

@@ -4,7 +4,7 @@ const mockInquirer = require('./../../../../helpers/mockInquirer')
 const path = require('path')
 const registry = require('./../../../../../lib/registry')
 
-const cdnSetup = require('./../../../../../entryPoints/api/commands/setup')
+const cdnSetup = require('./../../../../../entryPoints/cdn/commands/setup')
 const configHelpers = require('./../../../../../lib/config')
 const fsHelpers = require('./../../../../../lib/fs')
 
@@ -61,6 +61,36 @@ describe('CDN `setup` command', () => {
     configHelpers.saveAppConfig.mockClear()
 
     promptAnswers = {
+      assets: {
+        directory: {
+          enabled: false
+        },
+        remote: {
+          enabled: false
+        },
+        s3: {
+          enabled: false
+        }
+      },
+      caching: {
+        directory: {
+          enabled: false
+        },
+        redis: {
+          enabled: false
+        }
+      },
+      images: {
+        directory: {
+          enabled: false
+        },
+        remote: {
+          enabled: false
+        },
+        s3: {
+          enabled: false
+        }
+      },
       server: {
         name: 'My CDN',
         host: '0.0.0.0',
@@ -71,19 +101,19 @@ describe('CDN `setup` command', () => {
     }
   })
 
-  test('writes the API configuration file', () => {
-    const args = argsHelper.getArgsForCommand('api setup')
+  test('writes the CDN configuration file', () => {
+    const args = argsHelper.getArgsForCommand('cdn setup')
 
     mockInquirer.setAnswer(promptAnswers)
 
     return cdnSetup(args).then(out => {
       const mockCall = configHelpers.saveAppConfig.mock.calls[0][0]
 
-      expect(configHelpers.saveAppConfig).toHaveBeenCalledTimes(2)
+      expect(configHelpers.saveAppConfig).toHaveBeenCalledTimes(1)
       expect(mockCall.description).toBe('CDN configuration file')
       expect(mockCall.fileName).toBe(`config.${promptAnswers.env}.json`)
       expect(mockCall.app).toBe('@dadi/cdn')
-      expect(mockCall.config).toEqual(answers)
+      expect(mockCall.config).toEqual(promptAnswers)
     })
   })  
 })
