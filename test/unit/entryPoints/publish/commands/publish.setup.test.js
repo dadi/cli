@@ -84,10 +84,9 @@ describe('Publish `setup` command', () => {
       expect(mockCall.description).toBe('Publish configuration file')
       expect(mockCall.fileName).toBe(`config.${promptAnswers.env}.json`)
       expect(mockCall.app).toBe('@dadi/publish')
-      expect(mockCall.config).toEqual({
-        ...promptAnswers,
+      expect(mockCall.config).toEqual(Object.assign({}, promptAnswers, {
         cdn: undefined
-      })
+      }))
     })
   })  
 })
