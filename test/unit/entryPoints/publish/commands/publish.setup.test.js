@@ -65,6 +65,9 @@ describe('Publish `setup` command', () => {
         host: '0.0.0.0',
         port: 8081
       },
+      cdn: {
+        __enabled: false
+      },
       env: 'development'
     }
   })
@@ -81,7 +84,10 @@ describe('Publish `setup` command', () => {
       expect(mockCall.description).toBe('Publish configuration file')
       expect(mockCall.fileName).toBe(`config.${promptAnswers.env}.json`)
       expect(mockCall.app).toBe('@dadi/publish')
-      expect(mockCall.config).toEqual(promptAnswers)
+      expect(mockCall.config).toEqual({
+        ...promptAnswers,
+        cdn: undefined
+      })
     })
   })  
 })

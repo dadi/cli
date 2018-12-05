@@ -156,10 +156,8 @@ describe('Config utility', () => {
 
         expect(mockSpinner.mock.calls[0][0]).toBe('Writing files')
         expect(mockSpinner.mock.calls[0][1]).toBe('start')
-        expect(mockSpinner.mock.calls[1][0]).toBe(`Configuration file written to ${config.path}.`)
+        expect(mockSpinner.mock.calls[1][0]).toBe(`Configuration file written to ${configFilePath}.`)
         expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
-
-        expect(config.path).toBe(configFilePath)
       })
     })
 
@@ -218,11 +216,8 @@ describe('Config utility', () => {
 
         expect(mockSpinner.mock.calls[0][0]).toBe('Writing files')
         expect(mockSpinner.mock.calls[0][1]).toBe('start')
-        expect(mockSpinner.mock.calls[1][0]).toBe(`Configuration file written to ${config.path}. A file already existed at that location, so it was backed up to ${config.backupPath}.`)
+        expect(mockSpinner.mock.calls[1][0]).toBe(`Configuration file written to ${configFilePath}. A file already existed at that location, so it was backed up to ${backupFilePath}.`)
         expect(mockSpinner.mock.calls[1][1]).toBe('warn')
-
-        expect(config.path).toBe(configFilePath)
-        expect(config.backupPath).toBe(backupFilePath)
 
         Date.prototype.getTime = getTime
       })
