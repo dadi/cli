@@ -4,6 +4,7 @@ const configHelpers = require('./../../../lib/config')
 const fsHelpers = require('./../../../lib/fs')
 const path = require('path')
 const Setup = require('./../../../lib/setup')
+const shellHelpers = require('./../../../lib/shell')
 
 const steps = [
   {
@@ -11,11 +12,38 @@ const steps = [
     questions: [
       {
         name: 'server.host',
-        message: 'What IP address should the application be bount to?'
+        message: 'What IP address should the application be bound to?'
       },
       {
         name: 'server.port',
-        message: 'What port number should the application be bount to?'
+        message: 'What port number should the application be bound to?'
+      },
+      {
+        name: 'publicUrl.host',
+        message: 'What domain name will the application be accessible on?',
+        default: 'publish.somedomain.tech'
+      },
+      {
+        name: 'publicUrl.protocol',
+        message: 'What protocol will the application be accessible on?',
+        choices: [
+          {
+            name: 'HTTPS (secure, recommended)',
+            value: 'https'
+          },
+          {
+            name: 'HTTP (insecure)',
+            value: 'http'
+          }
+        ],
+        default: 'https'
+      },
+      {
+        name: 'publicUrl.port',
+        message: 'What port will the application be accessible on?',
+        default: answers => {
+          return answers.publicUrl.protocol === 'https' ? 443 : 80
+        }
       }
     ]
   },
@@ -31,7 +59,35 @@ const steps = [
       {
         name: 'apis.0.port',
         message: 'What port number is the API running on?',
-        default: 443
+        default: answers => {
+          return answers.apis[0].host.indexOf('https://') === 0 ? 443 : 80
+        }
+      },
+      {
+        name: 'cdn.__enabled',
+        message: 'Where would you like to load media assets from?',
+        choices: [
+          {
+            name: 'Directly from DADI API',
+            value: false
+          },
+          {
+            name: 'From an instance of DADI CDN',
+            value: true
+          }
+        ],
+        default: false
+      },
+      {
+        condition: answers => answers.cdn.__enabled,
+        name: 'cdn.publicUrl',
+        message: 'What is the full URL of the DADI CDN instance?',
+        default: 'https://cdn.somedomain.tech'
+      },
+      {
+        condition: answers => answers.cdn.__enabled,
+        type: 'info',
+        message: 'Note that you\'ll need to configure DADI CDN separately. You should point its remote location to the URL of your DADI API instance.'
       }
     ]
   },
@@ -85,12 +141,27 @@ const launchSetup = () => {
 
     return setup.start()
   }).then(answers => {
+    if (answers.cdn) {
+      if (answers.cdn.__enabled) {
+        delete answers.cdn.__enabled
+      } else {
+        delete answers.cdn
+      }
+    }
+
     return configHelpers.saveAppConfig({
       app,
       config: answers,
       description: 'Publish configuration file',
       fileName: `config.${answers.env}.json`
     })
+  }).catch(error => {
+    shellHelpers.showSpinner(
+      'This directory does not seem to contain a valid installation of DADI Publish.',
+      'fail'
+    )
+
+    return Promise.reject(error)
   })
 }
 
