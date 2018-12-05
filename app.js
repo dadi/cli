@@ -6,6 +6,7 @@ const format = require('./lib/format')
 const entryPoints = {
   api: require('./entryPoints/api'),
   cdn: require('./entryPoints/cdn'),
+  publish: require('./entryPoints/publish'),
   web: require('./entryPoints/web')
 }
 const pkg = require('./package.json')

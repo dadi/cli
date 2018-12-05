@@ -3,6 +3,7 @@
 const configHelpers = require('./../../../lib/config')
 const fsHelpers = require('./../../../lib/fs')
 const Setup = require('./../../../lib/setup')
+const shellHelpers = require('./../../../lib/shell')
 
 const steps = [
   // Server
@@ -288,9 +289,16 @@ const launchSetup = () => {
     return configHelpers.saveAppConfig({
       app,
       config: answers,
-      description: 'API configuration file',
+      description: 'CDN configuration file',
       fileName: `config.${answers.env}.json`
     })
+  }).catch(error => {
+    shellHelpers.showSpinner(
+      'This directory does not seem to contain a valid installation of DADI CDN.',
+      'fail'
+    )
+
+    return Promise.reject(error)
   })
 }
 
