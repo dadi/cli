@@ -10,6 +10,8 @@ const echo = console.log
 Promise.resolve(cli.start())
   .then(output => {
     if (output) echo(output)
+
+    process.exit(0)
   })
   .catch(err => {
     if (err && global.debugMode) echo(err)
