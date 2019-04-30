@@ -1,7 +1,7 @@
 <img src="https://dadi.cloud/assets/products/dadi-cli.png" alt="DADI CLI logo" height="65"/>
 
 [![npm (scoped)](https://img.shields.io/npm/v/@dadi/cli.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cli)
-[![coverage](https://img.shields.io/badge/coverage-83%-yellow.svg?style=flat?style=flat-square)](https://github.com/dadi/cli)
+[![Coverage Status](https://coveralls.io/repos/github/dadi/cli/badge.svg?branch=master)](https://coveralls.io/github/dadi/cli?branch=master)
 [![Build Status](https://travis-ci.org/dadi/cli.svg?branch=master)](https://travis-ci.org/dadi/cli)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](http://standardjs.com/)
 
@@ -77,7 +77,7 @@ REGISTRY_URL="http://localhost:7100" node index.js help
 DADI is a data centric development and delivery stack, built specifically in support of the principles of API first and COPE.
 
 Copyright notice<br />
-(C) 2017 DADI+ Limited <support@dadi.tech><br />
+(C) 2019 DADI+ Limited <support@dadi.tech><br />
 All rights reserved
 
 This product is part of DADI.<br />
