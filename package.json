@@ -29,7 +29,7 @@
     "semver-compare-range": "0.0.3"
   },
   "devDependencies": {
-    "istanbul-cobertura-badger": "^1.3.0",
+    "coveralls": "^3.0.3",
     "jest": "^21.2.1",
     "nock": "^9.0.14",
     "pmock": "^0.2.3",
@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/dadi/cli",
   "scripts": {
-    "test": "standard --fix && jest --no-color && node test/utils/coverage.js",
+    "test": "standard --fix && jest --coverage --no-color && node test/utils/coverage.js",
     "test-dev": "jest --watch",
     "build": "pkg index.js -c package.json -o bin/dadi"
   },
@@ -58,6 +58,7 @@
     "coverageReporters": [
       "cobertura",
       "html",
+      "lcov",
       "text"
     ],
     "testMatch": [
