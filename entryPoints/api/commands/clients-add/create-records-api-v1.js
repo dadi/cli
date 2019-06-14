@@ -4,6 +4,10 @@ const clientId = process.argv[1]
 const secret = process.argv[2]
 const accessType = process.argv[3]
 
+if (typeof console.restoreConsole === 'function') {
+  console.restoreConsole()
+}
+
 const options = apiConfig.get('auth.database')
 options.auth = true
 

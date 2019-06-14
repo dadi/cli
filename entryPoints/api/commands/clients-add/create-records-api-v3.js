@@ -4,6 +4,10 @@ const clientId = process.argv[1]
 const secret = process.argv[2]
 const accessType = process.argv[3]
 
+if (typeof console.restoreConsole === 'function') {
+  console.restoreConsole()
+}
+
 const getClientStoreSchema = () => {
   return {
     fields: {
@@ -74,17 +78,30 @@ connection.on('connect', db => {
     clientId: clientId
   }
 
-  db.find({ query, collection: clientCollectionName, options: {}, schema: getClientStoreSchema() }).then(existingClients => {
-    if (existingClients.results.length > 0) {
-      terminate(new Error('ID_EXISTS'), null, db)
-    }
+  db.find({
+    query,
+    collection: clientCollectionName,
+    options: {},
+    schema: getClientStoreSchema()
+  })
+    .then(existingClients => {
+      if (existingClients.results.length > 0) {
+        terminate(new Error('ID_EXISTS'), null, db)
+      }
 
-    db.insert({ data: payload, collection: clientCollectionName, schema: getClientStoreSchema() }).then(result => {
-      terminate(null, result, db)
-    }).catch(err => {
+      db.insert({
+        data: payload,
+        collection: clientCollectionName,
+        schema: getClientStoreSchema()
+      })
+        .then(result => {
+          terminate(null, result, db)
+        })
+        .catch(err => {
+          terminate(err, null, db)
+        })
+    })
+    .catch(err => {
       terminate(err, null, db)
     })
-  }).catch(err => {
-    terminate(err, null, db)
-  })
 })
