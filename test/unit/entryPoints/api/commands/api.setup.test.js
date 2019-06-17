@@ -11,6 +11,8 @@ const apiSetup = require('./../../../../../entryPoints/api/commands/setup')
 const configHelpers = require('./../../../../../lib/config')
 const fsHelpers = require('./../../../../../lib/fs')
 
+console.log = () => {}
+
 beforeEach(() => {
   fs.readdir = jest.fn(path => {
     return Promise.resolve([])
@@ -64,7 +66,7 @@ describe('API `setup` command', () => {
       return apiSetup(args).catch(err => {
         expect(err.message).toBe('UNSUPPORTED_VERSION')
       })
-    })    
+    })
   })
 
   describe('API >= v3', () => {
@@ -148,7 +150,7 @@ describe('API `setup` command', () => {
         .query({
           text: 'dadi-api-connector'
         })
-        .reply(200, {objects: mockNpmPackages})
+        .reply(200, { objects: mockNpmPackages })
 
       mockInquirer.setAnswer(promptAnswers)
 
@@ -174,9 +176,9 @@ describe('API `setup` command', () => {
 
     describe('clients:add command', () => {
       beforeAll(() => {
-        apiClientsAdd.createClient = jest.fn(() => Promise.resolve(true))  
+        apiClientsAdd.createClient = jest.fn(() => Promise.resolve(true))
       })
-      
+
       beforeEach(() => {
         apiClientsAdd.createClient.mockClear()
       })
@@ -188,12 +190,15 @@ describe('API `setup` command', () => {
 
         return apiSetup(args).then(out => {
           expect(apiClientsAdd.createClient).toHaveBeenCalledTimes(1)
-          expect(apiClientsAdd.createClient.mock.calls[0][0].clientId)
-            .toBe(promptAnswers._meta.client.clientId)
-          expect(apiClientsAdd.createClient.mock.calls[0][0].secret)
-            .toBe(promptAnswers._meta.client.secret)
-          expect(apiClientsAdd.createClient.mock.calls[0][0].accessType)
-            .toBe(promptAnswers._meta.client.accessType)
+          expect(apiClientsAdd.createClient.mock.calls[0][0].clientId).toBe(
+            promptAnswers._meta.client.clientId
+          )
+          expect(apiClientsAdd.createClient.mock.calls[0][0].secret).toBe(
+            promptAnswers._meta.client.secret
+          )
+          expect(apiClientsAdd.createClient.mock.calls[0][0].accessType).toBe(
+            promptAnswers._meta.client.accessType
+          )
         })
       })
 
@@ -230,16 +235,21 @@ describe('API `setup` command', () => {
           expect(mockCall.fileName).toBe(`rethinkdb.${promptAnswers.env}.json`)
           expect(mockCall.app).toBe('@dadi/api')
 
-          expect(mockCall.config.hosts[0].host)
-            .toBe(promptAnswers._meta.datastore.host)
-          expect(mockCall.config.hosts[0].port)
-            .toBe(promptAnswers._meta.datastore.port)
-          expect(mockCall.config.username)
-            .toBe(promptAnswers._meta.datastore.username)
-          expect(mockCall.config.password)
-            .toBe(promptAnswers._meta.datastore.password)
-          expect(mockCall.config.database)
-            .toBe(promptAnswers._meta.datastore.database)
+          expect(mockCall.config.hosts[0].host).toBe(
+            promptAnswers._meta.datastore.host
+          )
+          expect(mockCall.config.hosts[0].port).toBe(
+            promptAnswers._meta.datastore.port
+          )
+          expect(mockCall.config.username).toBe(
+            promptAnswers._meta.datastore.username
+          )
+          expect(mockCall.config.password).toBe(
+            promptAnswers._meta.datastore.password
+          )
+          expect(mockCall.config.database).toBe(
+            promptAnswers._meta.datastore.database
+          )
         })
       })
     })
@@ -264,25 +274,31 @@ describe('API `setup` command', () => {
           expect(mockCall.fileName).toBe(`mongodb.${promptAnswers.env}.json`)
           expect(mockCall.app).toBe('@dadi/api')
 
-          expect(mockCall.config.hosts[0].host)
-            .toBe(promptAnswers._meta.datastore.host)
-          expect(mockCall.config.hosts[0].port)
-            .toBe(promptAnswers._meta.datastore.port)
-          expect(mockCall.config.username)
-            .toBe(promptAnswers._meta.datastore.username)
-          expect(mockCall.config.password)
-            .toBe(promptAnswers._meta.datastore.password)
-          expect(mockCall.config.database)
-            .toBe(promptAnswers._meta.datastore.database)
-          expect(mockCall.config.databases[promptAnswers._meta.datastore.database])
-            .toEqual({
-              hosts: [
-                {
-                  host: promptAnswers._meta.datastore.host,
-                  port: promptAnswers._meta.datastore.port
-                }
-              ]
-            })
+          expect(mockCall.config.hosts[0].host).toBe(
+            promptAnswers._meta.datastore.host
+          )
+          expect(mockCall.config.hosts[0].port).toBe(
+            promptAnswers._meta.datastore.port
+          )
+          expect(mockCall.config.username).toBe(
+            promptAnswers._meta.datastore.username
+          )
+          expect(mockCall.config.password).toBe(
+            promptAnswers._meta.datastore.password
+          )
+          expect(mockCall.config.database).toBe(
+            promptAnswers._meta.datastore.database
+          )
+          expect(
+            mockCall.config.databases[promptAnswers._meta.datastore.database]
+          ).toEqual({
+            hosts: [
+              {
+                host: promptAnswers._meta.datastore.host,
+                port: promptAnswers._meta.datastore.port
+              }
+            ]
+          })
         })
       })
     })

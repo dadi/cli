@@ -8,6 +8,8 @@ const publishSetup = require('./../../../../../entryPoints/publish/commands/setu
 const configHelpers = require('./../../../../../lib/config')
 const fsHelpers = require('./../../../../../lib/fs')
 
+console.log = () => {}
+
 beforeEach(() => {
   fs.readdir = jest.fn(path => {
     return Promise.resolve([])
@@ -84,9 +86,11 @@ describe('Publish `setup` command', () => {
       expect(mockCall.description).toBe('Publish configuration file')
       expect(mockCall.fileName).toBe(`config.${promptAnswers.env}.json`)
       expect(mockCall.app).toBe('@dadi/publish')
-      expect(mockCall.config).toEqual(Object.assign({}, promptAnswers, {
-        cdn: undefined
-      }))
+      expect(mockCall.config).toEqual(
+        Object.assign({}, promptAnswers, {
+          cdn: undefined
+        })
+      )
     })
-  })  
+  })
 })

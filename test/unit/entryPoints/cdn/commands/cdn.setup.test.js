@@ -8,6 +8,8 @@ const cdnSetup = require('./../../../../../entryPoints/cdn/commands/setup')
 const configHelpers = require('./../../../../../lib/config')
 const fsHelpers = require('./../../../../../lib/fs')
 
+console.log = () => {}
+
 beforeEach(() => {
   fs.readdir = jest.fn(path => {
     return Promise.resolve([])
@@ -115,5 +117,5 @@ describe('CDN `setup` command', () => {
       expect(mockCall.app).toBe('@dadi/cdn')
       expect(mockCall.config).toEqual(promptAnswers)
     })
-  })  
+  })
 })
