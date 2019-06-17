@@ -11,55 +11,25 @@
 
 DADI CLI is a command-line tool to help with the installation and customisation of the various products of the DADI platform.
 
-## Installation
-
-DADI CLI is installed with NPM, as a global module.
-
- ```
- npm install @dadi/cli -g
- ```
-
- Depending on how your NPM installation is configured, you might require super-user permissions to install a global module. This means that your regular user does not have permissions to write to the directories that NPM uses to store global packages and commands. You can fix this by following the instructions on the [NPM documentation pages](https://docs.npmjs.com/getting-started/fixing-npm-permissions).
-
- If you don't mind using the super-user to install global NPM modules, you need to install DADI CLI using the [`--unsafe-perm`](https://docs.npmjs.com/misc/config#unsafe-perm) flag.
-
-```
-npm install @dadi/cli -g --unsafe-perm
-```
-
-## Updating CLI
-
-CLI includes an auto-update feature, which makes it possible for you to use the latest versions of our products, as we roll them out, without having to manually update the CLI module.
-
-In some rare occasions, where an update can't be installed automatically, we might ask you to update DADI CLI manually, which you can do with a single command:
-
-```
-[sudo] npm update @dadi/cli -g
-```
-
 ## Usage
 
-Commands always start with `dadi <product> <command>`, taking different parameters and flags depending on the operation.
+Commands always start with `npx dadi-cli <product> <command>`, taking different parameters and flags depending on the operation.
 
-The command `dadi help` shows a list of all the available commands for the various products, whilst `dadi help <product>` and `dadi help <product> <command>` provides detailed information about a product and a command, respectively.
+The command `npx dadi-cli help` shows a list of all the available commands for the various products, whilst `npx dadi-cli help <product>` and `npx dadi-cli help <product> <command>` provides detailed information about a product and a command, respectively.
 
 ## Links
-* [CLI Documentation](https://docs.dadi.cloud/cli/)
+
+- [CLI Documentation](https://docs.dadi.cloud/cli/)
 
 ## Development
 
-The repository is separated into two main directories:
-
-- `wrapper`: A thin wrapper that will download and execute CLI binaries. This is the application that gets published to NPM as `@dadi/cli`.
-- `core`: Where the main application lives. This application will be packaged using [pkg](https://github.com/zeit/pkg) to generate the CLI binaries.
-
-Most of the development work will be done on the `core` directory. To get started, run:
+To get started, run:
 
 ```shell
 # Install dependencies
-cd core && npm install
+npm install
 
-# Run the `dadi help` command
+# Run the `npx dadi-cli help` command
 node index.js help
 ```
 
@@ -97,7 +67,7 @@ them, to determine what licences are applicable.**
 
 DADI is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 The GNU General Public License (GPL) is available at
