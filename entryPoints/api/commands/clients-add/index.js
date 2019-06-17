@@ -10,63 +10,74 @@ const semverRangeCompare = require('semver-compare-range')
 const shell = require('./../../../../lib/shell')
 const utilHelpers = require('./../../../../lib/util')
 
-const createRecordsFnV1V2 = fs.readFileSync(
-  path.join(__dirname, 'create-records-api-v1-v2.js'),
-  'utf8'
-)
-const createRecordsFnV3 = fs.readFileSync(
-  path.join(__dirname, 'create-records-api-v3.js'),
-  'utf8'
-)
+function getCreateRecordsFunction (packageVersion) {
+  let fileName
 
-const createClient = ({
-  clientId,
-  message,
-  secret,
-  accessType
-}) => {
-  const generatedSecret = secret === ''
-    ? utilHelpers.generatePassword()
-    : null
+  if (semverRangeCompare(packageVersion, '3.0.0') < 0) {
+    fileName = 'create-records-api-v1.js'
+  } else if (semverRangeCompare(packageVersion, '5.0.0') < 0) {
+    fileName = 'create-records-api-v3.js'
+  } else {
+    fileName = 'create-records-api-v5.js'
+  }
 
-  return fsHelpers.loadAppFile('@dadi/api', {
-    filePath: 'package.json'
-  }).then(pkg => {
-    // Deciding which syntax to use based on the version of API.
-    let createRecordsFn = semverRangeCompare(pkg.version, '3.0.0') < 0
-      ? createRecordsFnV1V2
-      : createRecordsFnV3
+  return fs.readFileSync(path.join(__dirname, fileName), 'utf8')
+}
 
-    return new Promise((resolve, reject) => {
-      exec(`node -e "${createRecordsFn}" ${clientId} ${generatedSecret || secret} ${accessType}`, (err, stdout, stderr) => {
-        if (err) {
-          return reject(new Error(stderr))
-        }
+const createClient = ({ clientId, message, secret, accessType }) => {
+  const generatedSecret = secret === '' ? utilHelpers.generatePassword() : null
 
-        resolve(stdout)
+  return fsHelpers
+    .loadAppFile('@dadi/api', {
+      filePath: 'package.json'
+    })
+    .then(pkg => {
+      const createRecordsFn = getCreateRecordsFunction(pkg.version)
+
+      return new Promise((resolve, reject) => {
+        exec(
+          `node -e "${createRecordsFn}" ${clientId} ${generatedSecret ||
+            secret} ${accessType}`,
+          (err, stdout, stderr) => {
+            if (err) {
+              return reject(new Error(stderr))
+            }
+
+            resolve(stdout)
+          }
+        )
       })
     })
-  }).then(docs => {
-    if (message) {
-      let messageString = `Created client with ID ${colors.bold(clientId)} and access type ${colors.bold(accessType)}.`
+    .then(client => {
+      if (message) {
+        let messageString = `Created client with ID ${colors.bold(
+          clientId
+        )} and access type ${colors.bold(accessType)}.`
 
-      if (generatedSecret) {
-        messageString += ` The secret we generated for you is ${colors.bold(generatedSecret)} – store it somewhere safe!`
+        if (generatedSecret) {
+          messageString += ` The secret we generated for you is ${colors.bold(
+            generatedSecret
+          )} – store it somewhere safe!`
+        }
+
+        message.succeed(messageString)
       }
 
-      message.succeed(messageString)
-    }
-  }).catch(err => {
-    if (message) {
-      if (err && err.message.includes('ID_EXISTS')) {
-        message.fail(`The ID ${colors.bold(clientId)} already exists`)
-
-        return
+      if (global.debugMode) {
+        console.log(client)
       }
+    })
+    .catch(err => {
+      if (message) {
+        if (err && err.message.includes('ID_EXISTS')) {
+          message.fail(`The ID ${colors.bold(clientId)} already exists`)
 
-      message.fail('Could not create client')
-    }
-  })
+          return
+        }
+
+        message.fail('Could not create client')
+      }
+    })
 }
 
 const renderQuestions = () => {
@@ -79,7 +90,8 @@ const renderQuestions = () => {
     {
       type: 'input',
       name: 'secret',
-      message: 'Enter a strong secret (press Enter if you want us to generate one for you)'
+      message:
+        'Enter a strong secret (press Enter if you want us to generate one for you)'
     },
     {
       type: 'list',
@@ -98,22 +110,22 @@ const renderQuestions = () => {
     }
   ]
 
-  return inquirer
-    .prompt(questions)
+  return inquirer.prompt(questions)
 }
 
 module.exports = args => {
   if (args.id || args.secret) {
     const message = shell.showSpinner('Creating a new client')
-    const invalidArgs = ['id', 'secret'].filter(arg => {
-      return (
-        typeof args[arg] !== 'string' ||
-        args[arg].length === 0
-      )
-    }).map(arg => colors.bold(arg))
+    const invalidArgs = ['id', 'secret']
+      .filter(arg => {
+        return typeof args[arg] !== 'string' || args[arg].length === 0
+      })
+      .map(arg => colors.bold(arg))
 
     if (invalidArgs.length > 0) {
-      message.fail(`${invalidArgs.join(' and ')} must have at least 1 character`)
+      message.fail(
+        `${invalidArgs.join(' and ')} must have at least 1 character`
+      )
 
       return
     }

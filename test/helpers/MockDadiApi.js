@@ -6,12 +6,34 @@ const mockConfig = {
 
 let existingClients
 
-let mockDatabase = {
-  find: jest.fn(() => Promise.resolve({
-    results: existingClients
-  })),
+let mockACL = {
+  client: {
+    create: jest.fn(() => Promise.resolve({})),
+    find: jest.fn(() =>
+      Promise.resolve({
+        results: existingClients
+      })
+    )
+  },
+  model: {
+    connection: {
+      readyState: 1
+    }
+  }
+}
 
-  insert: jest.fn(() => Promise.resolve({}))
+let mockDatabase = {
+  find: jest.fn(() =>
+    Promise.resolve({
+      results: existingClients
+    })
+  ),
+
+  insert: jest.fn(() =>
+    Promise.resolve({
+      mockClient: true
+    })
+  )
 }
 
 let mockConnection = jest.fn((options, datastore) => {
@@ -27,19 +49,22 @@ let mockConnection = jest.fn((options, datastore) => {
 beforeEach(() => {
   existingClients = []
 
+  mockACL.client.create.mockClear()
+  mockACL.client.find.mockClear()
   mockDatabase.find.mockClear()
   mockDatabase.insert.mockClear()
   mockConnection.mockClear()
 })
 
 module.exports = {
+  ACL: mockACL,
   Connection: mockConnection,
-
   Config: {
     get: parameter => mockConfig[parameter]
   }
 }
 
+module.exports.mockACL = mockACL
 module.exports.mockDatabase = mockDatabase
 module.exports.mockConfig = mockConfig
 module.exports.mockConnection = mockConnection
