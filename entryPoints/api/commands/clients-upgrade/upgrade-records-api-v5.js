@@ -1,49 +1,67 @@
 'use strict'
 
-const ACL = require('@dadi/api').ACL
+const apiACL = require('@dadi/api').ACL
+const apiConfig = require('@dadi/api').Config
+const apiConnection = require('@dadi/api').Connection
 
 if (typeof console.restoreConsole === 'function') {
   console.restoreConsole()
 }
 
-function waitForDatabaseConnection () {
-  const { model } = ACL.client
+function terminate (err, message, db) {
+  const exitProcess = () => {
+    if (err) {
+      console.error(err)
 
-  return new Promise(resolve => {
-    if (model.connection.readyState === 1) {
-      return resolve()
+      process.exit(1)
     } else {
-      model.connection.once('connect', resolve)
+      console.log(message)
+
+      process.exit(0)
     }
-  })
+  }
+
+  if (typeof db.close === 'function') {
+    db.close().then(exitProcess)
+  } else {
+    exitProcess()
+  }
 }
 
-waitForDatabaseConnection()
-  .then(() => {
-    return ACL.client.model.find({
+const clientCollectionName = apiConfig.get('auth.clientCollection')
+const dbOptions = {
+  auth: true,
+  database: apiConfig.get('auth.database'),
+  collection: clientCollectionName
+}
+const connection = apiConnection(dbOptions, apiConfig.get('auth.datastore'))
+
+let connected = false
+
+connection.on('connect', db => {
+  if (connected) return
+
+  connected = true
+
+  return apiACL.client.model
+    .find({
       query: {
         _hashVersion: null
       }
     })
-  })
-  .then(({ results }) => {
-    const queue = results.map(result => {
-      return ACL.client.update(result.clientId, {
-        secret: result.secret
+    .then(({ results }) => {
+      const queue = results.map(result => {
+        return apiACL.client.update(result.clientId, {
+          secret: result.secret
+        })
       })
+
+      return Promise.all(queue).then(() => results)
     })
-
-    return Promise.all(queue).then(() => results)
-  })
-  .then(results => {
-    console.log(results.length)
-
-    setTimeout(() => {
-      process.exit(0)
-    }, 1000)
-  })
-  .catch(error => {
-    console.log(error)
-
-    process.exit(1)
-  })
+    .then(results => {
+      return terminate(null, results.length, db)
+    })
+    .catch(error => {
+      return terminate(error, null, db)
+    })
+})
