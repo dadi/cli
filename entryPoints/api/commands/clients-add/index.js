@@ -32,7 +32,8 @@ const createClient = ({ clientId, message, secret, accessType }) => {
       filePath: 'package.json'
     })
     .then(pkg => {
-      const createRecordsFn = getCreateRecordsFunction(pkg.version)
+      const [version] = pkg.version.split('-')
+      const createRecordsFn = getCreateRecordsFunction(version)
 
       return new Promise((resolve, reject) => {
         exec(
