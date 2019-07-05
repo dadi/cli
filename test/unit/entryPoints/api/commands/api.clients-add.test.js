@@ -80,9 +80,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1}" ${mockAnswers.id} ${
+            `node -e "${createRecordsFnV1}" "${mockAnswers.id}" "${
               mockAnswers.secret
-            } ${mockAnswers.accessType}`
+            }" ${mockAnswers.accessType}`
           )
         })
       })
@@ -99,9 +99,9 @@ describe('API `clients:add` command', () => {
 
         return apiClientsAdd(args).then(stdout => {
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1}" ${
+            `node -e "${createRecordsFnV1}" "${
               mockAnswers.id
-            } ${mockRandomSecret} ${mockAnswers.accessType}`
+            }" "${mockRandomSecret}" ${mockAnswers.accessType}`
           )
         })
       })
@@ -164,9 +164,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV1}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } ${mockArgs.accessType}`
+            }" ${mockArgs.accessType}`
           )
         })
       })
@@ -186,9 +186,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][0]).toBe('Creating a new client')
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV1}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV1}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } user`
+            }" user`
           )
         })
       })
@@ -262,9 +262,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${
+            `node -e "${createRecordsFnV3}" "${mockAnswers.id}" "${
               mockAnswers.secret
-            } ${mockAnswers.accessType}`
+            }" ${mockAnswers.accessType}`
           )
         })
       })
@@ -288,9 +288,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${
+            `node -e "${createRecordsFnV3}" "${
               mockAnswers.id
-            } ${mockRandomSecret} ${mockAnswers.accessType}`
+            }" "${mockRandomSecret}" ${mockAnswers.accessType}`
           )
         })
       })
@@ -315,9 +315,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockAnswers.id} ${
+            `node -e "${createRecordsFnV3}" "${mockAnswers.id}" "${
               mockAnswers.secret
-            } ${mockAnswers.accessType}`
+            }" ${mockAnswers.accessType}`
           )
         })
       })
@@ -341,9 +341,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV3}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } ${mockArgs.accessType}`
+            }" ${mockArgs.accessType}`
           )
         })
       })
@@ -364,9 +364,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV3}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } user`
+            }" user`
           )
         })
       })
@@ -394,9 +394,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV3}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV3}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } ${mockArgs.accessType}`
+            }" ${mockArgs.accessType}`
           )
         })
       })
@@ -446,9 +446,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV5}" ${mockAnswers.id} ${
+            `node -e "${createRecordsFnV5}" "${mockAnswers.id}" "${
               mockAnswers.secret
-            } ${mockAnswers.accessType}`
+            }" ${mockAnswers.accessType}`
           )
         })
       })
@@ -472,9 +472,28 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('succeed')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV5}" ${
+            `node -e "${createRecordsFnV5}" "${
               mockAnswers.id
-            } ${mockRandomSecret} ${mockAnswers.accessType}`
+            }" "${mockRandomSecret}" ${mockAnswers.accessType}`
+          )
+        })
+      })
+
+      test('accepts `)` character in the passed arguments', () => {
+        const args = argsHelper.getArgsForCommand('api clients:add')
+        const mockAnswers = {
+          id: 'someClient',
+          secret: 'my(little)Secret',
+          accessType: 'admin'
+        }
+
+        setMockInquirerAnswer(mockAnswers)
+
+        return apiClientsAdd(args).then(stdout => {
+          expect(mockExec.mock.calls[0][0]).toBe(
+            `node -e "${createRecordsFnV5}" "${
+              mockAnswers.id
+            }" "${mockAnswers.secret}" ${mockAnswers.accessType}`
           )
         })
       })
@@ -499,9 +518,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV5}" ${mockAnswers.id} ${
+            `node -e "${createRecordsFnV5}" "${mockAnswers.id}" "${
               mockAnswers.secret
-            } ${mockAnswers.accessType}`
+            }" ${mockAnswers.accessType}`
           )
         })
       })
@@ -525,9 +544,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV5}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV5}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } ${mockArgs.accessType}`
+            }" ${mockArgs.accessType}`
           )
         })
       })
@@ -548,9 +567,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[0][1]).toBe('start')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV5}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV5}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } user`
+            }" user`
           )
         })
       })
@@ -578,9 +597,9 @@ describe('API `clients:add` command', () => {
           expect(mockSpinner.mock.calls[1][1]).toBe('fail')
 
           expect(mockExec.mock.calls[0][0]).toBe(
-            `node -e "${createRecordsFnV5}" ${mockArgs.clientId} ${
+            `node -e "${createRecordsFnV5}" "${mockArgs.clientId}" "${
               mockArgs.secret
-            } ${mockArgs.accessType}`
+            }" ${mockArgs.accessType}`
           )
         })
       })
