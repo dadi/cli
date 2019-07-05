@@ -37,8 +37,8 @@ const createClient = ({ clientId, message, secret, accessType }) => {
 
       return new Promise((resolve, reject) => {
         exec(
-          `node -e "${createRecordsFn}" ${clientId} ${generatedSecret ||
-            secret} ${accessType}`,
+          `node -e "${createRecordsFn}" "${clientId}" "${generatedSecret ||
+            secret}" ${accessType}`,
           (err, stdout, stderr) => {
             if (err) {
               return reject(new Error(stderr))
